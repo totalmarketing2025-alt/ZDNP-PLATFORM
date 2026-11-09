@@ -1,12 +1,7 @@
-# НОВ ПОЧЕТОК – СКОПЈЕ
+# ZDNP Platform / Платформа Нов почеток
 
-Независна граѓанска информативна платформа.
+Двојазична статичка веб-страница: македонски (MK) и албански (SQ).
 
-Website: https://www.zdnp.mk (планиран домен)
-Contact: zdnp.mk@gmail.com
+Deploy: Cloudflare Pages, root directory, no build command.
 
-## Објавување
-Статичка страница: `index.html` и `assets/`. Во Cloudflare Pages поврзете го GitHub репозиториумот, со build command празно и output directory `/` (root).
-
-## Важно
-Системот од 100 поени е едукативна симулација на работен предлог, не службена проценка. Платформата не е регистрирано здружение и не е државен орган.
+Контакт: zdnp.mk@gmail.com · www.zdnp.mk

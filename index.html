@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="mk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#082d4b">
-  <meta name="description" content="Независна граѓанска платформа „Нов почеток“ – Скопје. Човекови права, достоинство, поддршка и ресоцијализација.">
-  <title>Нов почеток – Секој заслужува втора шанса!</title>
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#082d4b" name="theme-color"/>
+<meta content="Независна граѓанска платформа „Нов почеток“ – Скопје. Човекови права, достоинство, поддршка и ресоцијализација." name="description"/>
+<title>Нов почеток – Секој заслужува втора шанса!</title>
+<link href="assets/logo.svg" rel="icon" type="image/svg+xml"/>
+<style>
     :root{--navy:#082d4b;--navy2:#0d4268;--blue:#1b5c83;--gold:#e5a326;--ink:#203347;--muted:#607285;--paper:#f5f8fb;--white:#fff;--line:#dce5ed;--shadow:0 18px 48px rgba(8,45,75,.12)}
     *{box-sizing:border-box}
     html{scroll-behavior:smooth;scroll-padding-top:86px}
@@ -112,110 +113,101 @@
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
   .calculator{background:white;border:1px solid var(--line);border-radius:24px;padding:25px;max-width:900px;margin:auto}.score-field{display:grid;grid-template-columns:1fr 160px 36px;align-items:center;gap:14px;margin:14px 0}.score-field input{width:100%;accent-color:#e5a326}.score-total{text-align:center;background:#eef4f8;padding:20px;border-radius:18px;margin-top:20px}.score-total strong{font-size:2rem;color:#082d4b}.score-total .button{cursor:pointer}.phase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:25px}.phase-grid>div{background:white;border:1px solid var(--line);padding:18px;border-radius:16px}.phase-grid p{color:var(--muted)}@media(max-width:700px){.score-field{grid-template-columns:1fr 65px}.score-field input{grid-column:1 / -1;grid-row:2}.phase-grid{grid-template-columns:1fr}}
 </style>
-</head>
+<style>.language-switch{display:flex;gap:5px;flex-shrink:0;border:1px solid #dce5ed;border-radius:999px;padding:4px;background:#f5f8fb}.language-switch button{border:0;border-radius:999px;padding:7px 11px;font-weight:800;cursor:pointer;color:#082d4b;background:transparent}.language-switch button[aria-pressed="true"]{background:#082d4b;color:white}@media(max-width:700px){.nav{flex-wrap:wrap}.language-switch{margin-left:auto}.brand{min-width:0}.brand strong{font-size:.9rem}}</style></head>
 <body>
-  <div class="topline"><div class="container"><span>Независна граѓанска платформа „Нов почеток“ – Скопје</span><span>Човекови права • Поддршка • Ресоцијализација</span></div></div>
-  <header>
-    <div class="container nav">
-      <a class="brand" href="#pocetna" aria-label="Нов почеток – почетна">
-        <img src="assets/logo.svg" alt="Лого на Нов почеток">
-        <span><strong>НОВ ПОЧЕТОК</strong><small>Граѓанска платформа · Скопје</small></span>
-      </a>
-      <button class="menu-toggle" aria-label="Отвори мени" aria-expanded="false" id="menuToggle">☰</button>
-      <nav id="mainNav">
-        <a href="#za-nas">За нас</a><a href="#programi">Нашата работа</a><a href="#model100">100 поени</a><a href="#2027">План за 2027</a><a href="#vkluci-se">Вклучи се</a><a class="nav-cta" href="#kontakt">Контакт</a>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero" id="pocetna">
-      <div class="container hero-inner">
-        <div class="hero-copy">
-          <div class="eyebrow">Достоинство. Поддршка. Нов пат.</div>
-          <h1>Секој заслужува <span>втора шанса!</span></h1>
-          <p>Работиме за заштита на човековите права и достоинството, поддршка на ресоцијализацијата и создавање реални можности за враќање во заедницата.</p>
-          <div class="hero-actions"><a class="button gold" href="#za-nas">Запознајте нè <span aria-hidden="true">→</span></a><a class="button outline" href="#programi">Што правиме</a></div>
-        </div>
-        <div class="hero-mark"><img src="assets/logo.svg" alt="Официјален визуелен знак на платформата Нов почеток"></div>
-      </div>
-    </section>
-
-    <div class="trustbar"><div class="container">
-      <div class="trust-item"><span class="trust-icon">⚖️</span><span>Заштита на правата</span></div>
-      <div class="trust-item"><span class="trust-icon">🤝</span><span>Поддршка и партнерство</span></div>
-      <div class="trust-item"><span class="trust-icon">🌱</span><span>Ресоцијализација и нов почеток</span></div>
-    </div></div>
-
-    <section id="za-nas">
-      <div class="container about-grid">
-        <div class="about-card"><img src="assets/logo.svg" alt="Лого на платформата"></div>
-        <div class="about-copy">
-          <div class="section-kicker">Кои сме ние</div>
-          <h2>Достоинството е почеток на секоја промена.</h2>
-          <p>Платформата „Нов почеток“ – Скопје е насочено кон заштита и унапредување на правата на затворените и притворените лица, залагање за хумани и законски услови и поддршка за ресоцијализација, рехабилитација и реинтеграција.</p>
-          <p>Веруваме дека со информирање, соработка и пристап до образование, работа и соодветни услуги може да се создадат подобри можности за поединците, нивните семејства и заедницата.</p>
-          <div class="values">
-            <div class="value"><span class="check">✓</span><span>Почитување на човековите права</span></div>
-            <div class="value"><span class="check">✓</span><span>Еднаквост и недискриминација</span></div>
-            <div class="value"><span class="check">✓</span><span>Транспарентност и отчетност</span></div>
-            <div class="value"><span class="check">✓</span><span>Приватност и безбедност</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="programs" id="programi">
-      <div class="container">
-        <div class="section-head"><div class="section-kicker">Нашите приоритети</div><h2>Работа со цел и човечност</h2><p>Програмските области се насочени кон практична поддршка, информирање и соработка со надлежните институции и стручни партнери.</p></div>
-        <div class="cards">
-          <article class="card"><div class="card-icon">⚖️</div><h3>Човекови права</h3><p>Информирање за правата и постојните механизми за заштита, документирање системски прашања и подготовка на препораки до надлежните институции.</p></article>
-          <article class="card"><div class="card-icon">📘</div><h3>Образование и вештини</h3><p>Развивање информативни работилници за животни вештини, комуникација, управување со лични финансии и подготовка за работа.</p></article>
-          <article class="card"><div class="card-icon">🧭</div><h3>Поддршка по излегување</h3><p>Информации за лични документи, вработување и достапни услуги, како и упатување до соодветни организации и стручни служби.</p></article>
-          <article class="card"><div class="card-icon">👨‍👩‍👧</div><h3>Поддршка на семејствата</h3><p>Информативни средби и поврзување со достапни услуги и партнерски организации за семејствата и блиските лица.</p></article>
-          <article class="card"><div class="card-icon">🤝</div><h3>Институционална соработка</h3><p>Соработка со институции, стручни лица, образовни установи, работодавачи и граѓански организации.</p></article>
-          <article class="card"><div class="card-icon">📣</div><h3>Јавна свест</h3><p>Едукативни материјали и јавни активности за намалување на стигмата и поттикнување одговорен, недискриминаторски пристап.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section id="model100" class="programs"><div class="container"><div class="section-head"><div class="section-kicker">Предлог за ресоцијализација</div><h2>Модел од 100 поени</h2><p>Интерактивна едукативна симулација со десет области. Ова не е официјална институционална проценка и не создава право на условен отпуст.</p></div><div class="calculator"><div id="scoreFields"></div><div class="score-total"><strong id="totalScore">0 / 100</strong><p id="scoreMeaning">Изберете вредности за да го видите примерот.</p><button type="button" class="button" id="resetScore">Ресетирај</button></div></div><div class="phase-grid"><div><b>А — Одговорност</b><p>Препознавање на постапките и поставување цели.</p></div><div><b>Б — Промена</b><p>Образование, вештини и одговорно однесување.</p></div><div><b>В — Доказ</b><p>Проверлив напредок и исполнети цели.</p></div><div><b>Г — Подготовка за излез</b><p>План за работа, домување и поддршка.</p></div></div></div></section><section class="year-plan" id="2027">
-      <div class="container">
-        <div class="section-head"><div class="section-kicker">Годишна програма</div><h2>План за работа за 2027 година</h2><p>Активностите ќе се спроведуваат според достапните ресурси, капацитетите на платформата и потребните одобренија.</p></div>
-        <div class="timeline">
-          <article class="quarter"><div class="num">ЈАНУАРИ – МАРТ</div><h3>Поставување основи</h3><ul><li>Усвојување програма и оперативен календар.</li><li>Подготовка на интерни правила.</li><li>Мапирање на потребите и партнерите.</li></ul></article>
-          <article class="quarter"><div class="num">АПРИЛ – ЈУНИ</div><h3>Партнерства и подготовка</h3><ul><li>Контакти со институции и стручни партнери.</li><li>Подготовка на материјали за работилници.</li><li>Информативна активност и проектни предлози.</li></ul></article>
-          <article class="quarter"><div class="num">ЈУЛИ – СЕПТЕМВРИ</div><h3>Пилот-активности</h3><ul><li>Работилници или информативни активности.</li><li>Средба за семејства, ако има капацитет.</li><li>Анонимизирани повратни информации.</li></ul></article>
-          <article class="quarter"><div class="num">ОКТОМВРИ – ДЕКЕМВРИ</div><h3>Евалуација и отчетност</h3><ul><li>Анализа на резултатите.</li><li>Годишен наративен и финансиски извештај.</li><li>Подготовка на план за 2028 година.</li></ul></article>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="container impact-grid">
-        <div><div class="section-kicker">Нашиот пристап</div><h2>Промената почнува со можност.</h2><p style="color:var(--muted)">Се стремиме кон практични чекори што го почитуваат достоинството и ги поврзуваат луѓето со информации, поддршка и соодветни услуги.</p><div class="quote">„Секој заслужува втора шанса!“<small>Мото на Платформата „Нов почеток“ – Скопје</small></div></div>
-        <div class="impact-panel"><h3>Што сакаме да постигнеме</h3><ul class="impact-list"><li><span>✓</span><div><b>Подобра информираност</b><br><span>За права, можности и достапни услуги.</span></div></li><li><span>✓</span><div><b>Посилна соработка</b><br><span>Со институции и организации што можат да помогнат.</span></div></li><li><span>✓</span><div><b>Практични вештини</b><br><span>За образование, секојдневен живот и работа.</span></div></li><li><span>✓</span><div><b>Помалку стигма</b><br><span>Повеќе достоинство, разбирање и можности.</span></div></li></ul></div>
-      </div>
-    </section>
-
-    <section class="join" id="vkluci-se">
-      <div class="container join-box"><div><div class="section-kicker">Бидете дел од промената</div><h2>Заедно можеме повеќе.</h2><p>Отворени сме за соработка со граѓански организации, институции, стручни лица, образовни установи, работодавачи и донатори кои ги споделуваат нашите цели.</p></div><a class="button" href="#kontakt">Контактирајте нè <span aria-hidden="true">→</span></a></div>
-    </section>
-
-    <section id="kontakt">
-      <div class="container">
-        <div class="section-head"><div class="section-kicker">Контакт</div><h2>Поврзете се со „Нов почеток“</h2><p>За информации и можности за соработка, обратете ни се преку седиштето на платформата.</p></div>
-        <div class="contact-grid">
-          <div class="contact-info"><h3>Граѓанска платформа „Нов почеток“</h3><p>Секој заслужува втора шанса!</p><div class="contact-line"><span class="symbol">📍</span><div><strong>Адреса</strong><span>Скопје, Северна Македонија</span></div></div><div class="contact-line"><span class="symbol">🌐</span><div><strong>Веб-страница</strong><span>www.zdnp.mk</span></div></div><div class="contact-line"><span class="symbol">✉️</span><div><strong>Е-пошта</strong><span><a href="mailto:zdnp.mk@gmail.com">zdnp.mk@gmail.com</a></span></div></div></div>
-          <div class="contact-note"><h3>Соработка и партнерства</h3><p>Заедничките активности може да опфатат едукација, информирање за права, ресоцијализација, поддршка на семејствата и кампањи против стигматизација.</p><p><b>Напомена:</b> Е-пошта и телефон не се прикажани бидејќи официјални контакт-податоци не беа доставени за оваа веб-страница. Додадете ги пред објавување, ако сакате посетителите да можат директно да ве контактираат.</p></div>
-        </div>
-        <p class="disclaimer">Информациите на оваа веб-страница се општ информативен приказ на целите и планираните активности на платформата. Активностите во установи се спроведуваат само со потребните одобренија. Платформата не заменува надлежни институции ниту лиценцирани даватели на специјализирани услуги.</p>
-      </div>
-    </section>
-  </main>
-
-  <footer><div class="container footer-row"><div><div class="footer-brand">НОВ ПОЧЕТОК · СКОПЈЕ</div><small>© <span id="year"></span> Независна граѓанска платформа „Нов почеток“ – Скопје. Сите права се задржани.</small></div><a class="backtop" href="#pocetna">Назад на врв ↑</a></div></footer>
-  <script>
+<div class="topline"><div class="container"><span><span data-i18n="0">Независна граѓанска платформа „Нов почеток“ – Скопје</span></span><span><span data-i18n="1">Човекови права • Поддршка • Ресоцијализација</span></span></div></div>
+<header>
+<div class="container nav">
+<a aria-label="Нов почеток – почетна" class="brand" href="#pocetna">
+<img alt="Лого на Нов почеток" src="assets/logo.svg"/>
+<span><strong><span data-i18n="2">НОВ ПОЧЕТОК</span></strong><small><span data-i18n="3">Граѓанска платформа · Скопје</span></small></span>
+</a>
+<button aria-expanded="false" aria-label="Отвори мени" class="menu-toggle" id="menuToggle">☰</button>
+<nav id="mainNav">
+<a href="#za-nas"><span data-i18n="4">За нас</span></a><a href="#programi"><span data-i18n="5">Нашата работа</span></a><a href="#model100"><span data-i18n="6">100 поени</span></a><a href="#2027"><span data-i18n="7">План за 2027</span></a><a href="#vkluci-se"><span data-i18n="8">Вклучи се</span></a><a class="nav-cta" href="#kontakt"><span data-i18n="9">Контакт</span></a>
+</nav>
+<div aria-label="Избор на јазик / Zgjedhja e gjuhës" class="language-switch" role="group"><button aria-label="Македонски" data-lang="mk" type="button">MK</button><button aria-label="Shqip" data-lang="sq" type="button">SQ</button></div></div>
+</header>
+<main>
+<section class="hero" id="pocetna">
+<div class="container hero-inner">
+<div class="hero-copy">
+<div class="eyebrow"><span data-i18n="10">Достоинство. Поддршка. Нов пат.</span></div>
+<h1><span data-i18n="11">Секој заслужува</span><span><span data-i18n="12">втора шанса!</span></span></h1>
+<p><span data-i18n="13">Работиме за заштита на човековите права и достоинството, поддршка на ресоцијализацијата и создавање реални можности за враќање во заедницата.</span></p>
+<div class="hero-actions"><a class="button gold" href="#za-nas"><span data-i18n="14">Запознајте нè</span><span aria-hidden="true">→</span></a><a class="button outline" href="#programi"><span data-i18n="15">Што правиме</span></a></div>
+</div>
+<div class="hero-mark"><img alt="Официјален визуелен знак на платформата Нов почеток" src="assets/logo.svg"/></div>
+</div>
+</section>
+<div class="trustbar"><div class="container">
+<div class="trust-item"><span class="trust-icon">⚖️</span><span><span data-i18n="16">Заштита на правата</span></span></div>
+<div class="trust-item"><span class="trust-icon">🤝</span><span><span data-i18n="17">Поддршка и партнерство</span></span></div>
+<div class="trust-item"><span class="trust-icon">🌱</span><span><span data-i18n="18">Ресоцијализација и нов почеток</span></span></div>
+</div></div>
+<section id="za-nas">
+<div class="container about-grid">
+<div class="about-card"><img alt="Лого на платформата" src="assets/logo.svg"/></div>
+<div class="about-copy">
+<div class="section-kicker"><span data-i18n="19">Кои сме ние</span></div>
+<h2><span data-i18n="20">Достоинството е почеток на секоја промена.</span></h2>
+<p><span data-i18n="21">Платформата „Нов почеток“ – Скопје е насочена кон заштита и унапредување на правата на затворените и притворените лица, залагање за хумани и законски услови и поддршка за ресоцијализација, рехабилитација и реинтеграција.</span></p>
+<p><span data-i18n="22">Веруваме дека со информирање, соработка и пристап до образование, работа и соодветни услуги може да се создадат подобри можности за поединците, нивните семејства и заедницата.</span></p>
+<div class="values">
+<div class="value"><span class="check">✓</span><span><span data-i18n="23">Почитување на човековите права</span></span></div>
+<div class="value"><span class="check">✓</span><span><span data-i18n="24">Еднаквост и недискриминација</span></span></div>
+<div class="value"><span class="check">✓</span><span><span data-i18n="25">Транспарентност и отчетност</span></span></div>
+<div class="value"><span class="check">✓</span><span><span data-i18n="26">Приватност и безбедност</span></span></div>
+</div>
+</div>
+</div>
+</section>
+<section class="programs" id="programi">
+<div class="container">
+<div class="section-head"><div class="section-kicker"><span data-i18n="27">Нашите приоритети</span></div><h2><span data-i18n="28">Работа со цел и човечност</span></h2><p><span data-i18n="29">Програмските области се насочени кон практична поддршка, информирање и соработка со надлежните институции и стручни партнери.</span></p></div>
+<div class="cards">
+<article class="card"><div class="card-icon">⚖️</div><h3><span data-i18n="30">Човекови права</span></h3><p><span data-i18n="31">Информирање за правата и постојните механизми за заштита, документирање системски прашања и подготовка на препораки до надлежните институции.</span></p></article>
+<article class="card"><div class="card-icon">📘</div><h3><span data-i18n="32">Образование и вештини</span></h3><p><span data-i18n="33">Развивање информативни работилници за животни вештини, комуникација, управување со лични финансии и подготовка за работа.</span></p></article>
+<article class="card"><div class="card-icon">🧭</div><h3><span data-i18n="34">Поддршка по излегување</span></h3><p><span data-i18n="35">Информации за лични документи, вработување и достапни услуги, како и упатување до соодветни организации и стручни служби.</span></p></article>
+<article class="card"><div class="card-icon">👨‍👩‍👧</div><h3><span data-i18n="36">Поддршка на семејствата</span></h3><p><span data-i18n="37">Информативни средби и поврзување со достапни услуги и партнерски организации за семејствата и блиските лица.</span></p></article>
+<article class="card"><div class="card-icon">🤝</div><h3><span data-i18n="38">Институционална соработка</span></h3><p><span data-i18n="39">Соработка со институции, стручни лица, образовни установи, работодавачи и граѓански организации.</span></p></article>
+<article class="card"><div class="card-icon">📣</div><h3><span data-i18n="40">Јавна свест</span></h3><p><span data-i18n="41">Едукативни материјали и јавни активности за намалување на стигмата и поттикнување одговорен, недискриминаторски пристап.</span></p></article>
+</div>
+</div>
+</section>
+<section class="programs" id="model100"><div class="container"><div class="section-head"><div class="section-kicker"><span data-i18n="42">Предлог за ресоцијализација</span></div><h2><span data-i18n="43">Модел од 100 поени</span></h2><p><span data-i18n="44">Интерактивна едукативна симулација со десет области. Ова не е официјална институционална проценка и не создава право на условен отпуст.</span></p></div><div class="calculator"><div id="scoreFields"></div><div class="score-total"><strong id="totalScore">0 / 100</strong><p id="scoreMeaning"><span data-i18n="45">Изберете вредности за да го видите примерот.</span></p><button class="button" id="resetScore" type="button"><span data-i18n="46">Ресетирај</span></button></div></div><div class="phase-grid"><div><b><span data-i18n="47">А — Одговорност</span></b><p><span data-i18n="48">Препознавање на постапките и поставување цели.</span></p></div><div><b><span data-i18n="49">Б — Промена</span></b><p><span data-i18n="50">Образование, вештини и одговорно однесување.</span></p></div><div><b><span data-i18n="51">В — Доказ</span></b><p><span data-i18n="52">Проверлив напредок и исполнети цели.</span></p></div><div><b><span data-i18n="53">Г — Подготовка за излез</span></b><p><span data-i18n="54">План за работа, домување и поддршка.</span></p></div></div></div></section><section class="year-plan" id="2027">
+<div class="container">
+<div class="section-head"><div class="section-kicker"><span data-i18n="55">Годишна програма</span></div><h2><span data-i18n="56">План за работа за 2027 година</span></h2><p><span data-i18n="57">Активностите ќе се спроведуваат според достапните ресурси, капацитетите на платформата и потребните одобренија.</span></p></div>
+<div class="timeline">
+<article class="quarter"><div class="num"><span data-i18n="58">ЈАНУАРИ – МАРТ</span></div><h3><span data-i18n="59">Поставување основи</span></h3><ul><li><span data-i18n="60">Усвојување програма и оперативен календар.</span></li><li><span data-i18n="61">Подготовка на интерни правила.</span></li><li><span data-i18n="62">Мапирање на потребите и партнерите.</span></li></ul></article>
+<article class="quarter"><div class="num"><span data-i18n="63">АПРИЛ – ЈУНИ</span></div><h3><span data-i18n="64">Партнерства и подготовка</span></h3><ul><li><span data-i18n="65">Контакти со институции и стручни партнери.</span></li><li><span data-i18n="66">Подготовка на материјали за работилници.</span></li><li><span data-i18n="67">Информативна активност и проектни предлози.</span></li></ul></article>
+<article class="quarter"><div class="num"><span data-i18n="68">ЈУЛИ – СЕПТЕМВРИ</span></div><h3><span data-i18n="69">Пилот-активности</span></h3><ul><li><span data-i18n="70">Работилници или информативни активности.</span></li><li><span data-i18n="71">Средба за семејства, ако има капацитет.</span></li><li><span data-i18n="72">Анонимизирани повратни информации.</span></li></ul></article>
+<article class="quarter"><div class="num"><span data-i18n="73">ОКТОМВРИ – ДЕКЕМВРИ</span></div><h3><span data-i18n="74">Евалуација и отчетност</span></h3><ul><li><span data-i18n="75">Анализа на резултатите.</span></li><li><span data-i18n="76">Годишен наративен и финансиски извештај.</span></li><li><span data-i18n="77">Подготовка на план за 2028 година.</span></li></ul></article>
+</div>
+</div>
+</section>
+<section>
+<div class="container impact-grid">
+<div><div class="section-kicker"><span data-i18n="78">Нашиот пристап</span></div><h2><span data-i18n="79">Промената почнува со можност.</span></h2><p style="color:var(--muted)"><span data-i18n="80">Се стремиме кон практични чекори што го почитуваат достоинството и ги поврзуваат луѓето со информации, поддршка и соодветни услуги.</span></p><div class="quote"><span data-i18n="81">„Секој заслужува втора шанса!“</span><small><span data-i18n="82">Мото на Платформата „Нов почеток“ – Скопје</span></small></div></div>
+<div class="impact-panel"><h3><span data-i18n="83">Што сакаме да постигнеме</span></h3><ul class="impact-list"><li><span>✓</span><div><b><span data-i18n="84">Подобра информираност</span></b><br/><span><span data-i18n="85">За права, можности и достапни услуги.</span></span></div></li><li><span>✓</span><div><b><span data-i18n="86">Посилна соработка</span></b><br/><span><span data-i18n="87">Со институции и организации што можат да помогнат.</span></span></div></li><li><span>✓</span><div><b><span data-i18n="88">Практични вештини</span></b><br/><span><span data-i18n="89">За образование, секојдневен живот и работа.</span></span></div></li><li><span>✓</span><div><b><span data-i18n="90">Помалку стигма</span></b><br/><span><span data-i18n="91">Повеќе достоинство, разбирање и можности.</span></span></div></li></ul></div>
+</div>
+</section>
+<section class="join" id="vkluci-se">
+<div class="container join-box"><div><div class="section-kicker"><span data-i18n="92">Бидете дел од промената</span></div><h2><span data-i18n="93">Заедно можеме повеќе.</span></h2><p><span data-i18n="94">Отворени сме за соработка со граѓански организации, институции, стручни лица, образовни установи, работодавачи и донатори кои ги споделуваат нашите цели.</span></p></div><a class="button" href="#kontakt"><span data-i18n="95">Контактирајте нè</span><span aria-hidden="true">→</span></a></div>
+</section>
+<section id="kontakt">
+<div class="container">
+<div class="section-head"><div class="section-kicker"><span data-i18n="96">Контакт</span></div><h2><span data-i18n="97">Поврзете се со „Нов почеток“</span></h2><p><span data-i18n="98">За информации и можности за соработка, обратете ни се преку електронската пошта на платформата.</span></p></div>
+<div class="contact-grid">
+<div class="contact-info"><h3><span data-i18n="99">Граѓанска платформа „Нов почеток“</span></h3><p><span data-i18n="100">Секој заслужува втора шанса!</span></p><div class="contact-line"><span class="symbol">📍</span><div><strong><span data-i18n="101">Адреса</span></strong><span><span data-i18n="102">Скопје, Северна Македонија</span></span></div></div><div class="contact-line"><span class="symbol">🌐</span><div><strong><span data-i18n="103">Веб-страница</span></strong><span>www.zdnp.mk</span></div></div><div class="contact-line"><span class="symbol">✉️</span><div><strong><span data-i18n="104">Е-пошта</span></strong><span><a href="mailto:zdnp.mk@gmail.com">zdnp.mk@gmail.com</a></span></div></div></div>
+<div class="contact-note"><h3><span data-i18n="105">Соработка и партнерства</span></h3><p><span data-i18n="106">Заедничките активности може да опфатат едукација, информирање за права, ресоцијализација, поддршка на семејствата и кампањи против стигматизација.</span></p><p><b><span data-i18n="107">Напомена:</span></b><span data-i18n="108">За прашања и предлози за соработка, пишете на нашата официјална е-пошта: zdnp.mk@gmail.com.</span></p></div>
+</div>
+<p class="disclaimer"><span data-i18n="109">Информациите на оваа веб-страница се општ информативен приказ на целите и планираните активности на платформата. Активностите во установи се спроведуваат само со потребните одобренија. Платформата не заменува надлежни институции ниту лиценцирани даватели на специјализирани услуги.</span></p>
+</div>
+</section>
+</main>
+<footer><div class="container footer-row"><div><div class="footer-brand"><span data-i18n="110">НОВ ПОЧЕТОК · СКОПЈЕ</span></div><small>© <span id="year"></span><span data-i18n="111">Независна граѓанска платформа „Нов почеток“ – Скопје. Сите права се задржани.</span></small></div><a class="backtop" href="#pocetna"><span data-i18n="112">Назад на врв ↑</span></a></div></footer>
+<script>
     const toggle=document.getElementById('menuToggle');
     const nav=document.getElementById('mainNav');
     toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'✕':'☰';});
@@ -225,7 +217,30 @@
 <script>
 const criteria=['Преземање одговорност','Однесување и почитување правила','Учество во програми за ресоцијализација','Образование и личен развој','Занает и стручна оспособеност','Работни навики и одговорност','Комуникација и решавање конфликти','Лична стабилност и здрави навики','Одговорност кон семејството и општеството','План за живот по излегувањето'];
 const holder=document.getElementById('scoreFields');
-if(holder){criteria.forEach((name,i)=>{const r=document.createElement('div');r.className='score-field';const l=document.createElement('label');l.htmlFor='score'+i;l.textContent=(i+1)+'. '+name;const input=document.createElement('input');input.type='range';input.min='0';input.max='10';input.value='0';input.id='score'+i;const out=document.createElement('output');out.htmlFor=input.id;out.textContent='0 / 10';input.addEventListener('input',()=>{out.textContent=input.value+' / 10';updateScore()});r.append(l,input,out);holder.append(r)});document.getElementById('resetScore').addEventListener('click',()=>{holder.querySelectorAll('input').forEach(x=>{x.value=0;x.nextElementSibling.textContent='0 / 10'});updateScore()})}
-function updateScore(){const sum=[...holder.querySelectorAll('input')].reduce((a,x)=>a+Number(x.value),0);document.getElementById('totalScore').textContent=sum+' / 100';document.getElementById('scoreMeaning').textContent=sum<40?'Потребна е засилена поддршка и индивидуален план.':sum<60?'Почетен или делумен напредок.':sum<80?'Добар напредок според примерните критериуми.':sum<90?'Висок степен на напредок.':'Многу висок степен на напредок според примерниот модел.'}
+if(holder){criteria.forEach((name,i)=>{const r=document.createElement('div');r.className='score-field';const l=document.createElement('label');l.htmlFor='score'+i;l.textContent=(i+1)+'. '+(window.currentLang==='sq'?window.criteriaSq[i]:name);const input=document.createElement('input');input.type='range';input.min='0';input.max='10';input.value='0';input.id='score'+i;const out=document.createElement('output');out.htmlFor=input.id;out.textContent='0 / 10';input.addEventListener('input',()=>{out.textContent=input.value+' / 10';updateScore()});r.append(l,input,out);holder.append(r)});document.getElementById('resetScore').addEventListener('click',()=>{holder.querySelectorAll('input').forEach(x=>{x.value=0;x.nextElementSibling.textContent='0 / 10'});updateScore()})}
+function updateScore(){const sum=[...holder.querySelectorAll('input')].reduce((a,x)=>a+Number(x.value),0);document.getElementById('totalScore').textContent=sum+' / 100';document.getElementById('scoreMeaning').textContent=window.currentLang==='sq'?(sum<40?window.messagesSq[0]:sum<60?window.messagesSq[1]:sum<80?window.messagesSq[2]:sum<90?window.messagesSq[3]:window.messagesSq[4]):sum<40?'Потребна е засилена поддршка и индивидуален план.':sum<60?'Почетен или делумен напредок.':sum<80?'Добар напредок според примерните критериуми.':sum<90?'Висок степен на напредок.':'Многу висок степен на напредок според примерниот модел.'}
+</script><script>
+const i18nTexts = {"0": ["Независна граѓанска платформа „Нов почеток“ – Скопје", "Platformë e pavarur qytetare “Fillim i Ri” – Shkup"], "1": ["Човекови права • Поддршка • Ресоцијализација", "Të drejtat e njeriut • Mbështetje • Risocializim"], "2": ["НОВ ПОЧЕТОК", "FILLIM I RI"], "3": ["Граѓанска платформа · Скопје", "Platformë qytetare · Shkup"], "4": ["За нас", "Rreth nesh"], "5": ["Нашата работа", "Puna jonë"], "6": ["100 поени", "100 pikë"], "7": ["План за 2027", "Plani për 2027"], "8": ["Вклучи се", "Bëhu pjesë"], "9": ["Контакт", "Kontakt"], "10": ["Достоинство. Поддршка. Нов пат.", "Dinjitet. Mbështetje. Rrugë e re."], "11": ["Секој заслужува", "Çdokush meriton"], "12": ["втора шанса!", "një shans të dytë!"], "13": ["Работиме за заштита на човековите права и достоинството, поддршка на ресоцијализацијата и создавање реални можности за враќање во заедницата.", "Punojmë për mbrojtjen e të drejtave dhe dinjitetit të njeriut, mbështetjen e risocializimit dhe krijimin e mundësive reale për rikthim në komunitet."], "14": ["Запознајте нè", "Na njihni"], "15": ["Што правиме", "Çfarë bëjmë"], "16": ["Заштита на правата", "Mbrojtja e të drejtave"], "17": ["Поддршка и партнерство", "Mbështetje dhe partneritet"], "18": ["Ресоцијализација и нов почеток", "Risocializim dhe fillim i ri"], "19": ["Кои сме ние", "Kush jemi ne"], "20": ["Достоинството е почеток на секоја промена.", "Dinjiteti është fillimi i çdo ndryshimi."], "21": ["Платформата „Нов почеток“ – Скопје е насочена кон заштита и унапредување на правата на затворените и притворените лица, залагање за хумани и законски услови и поддршка за ресоцијализација, рехабилитација и реинтеграција.", "Platforma “Fillim i Ri” – Shkup synon mbrojtjen dhe përmirësimin e të drejtave të personave të burgosur dhe të paraburgosur, promovimin e kushteve humane dhe ligjore, si dhe mbështetjen e risocializimit, rehabilitimit dhe riintegrimit."], "22": ["Веруваме дека со информирање, соработка и пристап до образование, работа и соодветни услуги може да се создадат подобри можности за поединците, нивните семејства и заедницата.", "Besojmë se informimi, bashkëpunimi dhe qasja në arsim, punë dhe shërbime të përshtatshme krijojnë mundësi më të mira për individët, familjet e tyre dhe komunitetin."], "23": ["Почитување на човековите права", "Respektimi i të drejtave të njeriut"], "24": ["Еднаквост и недискриминација", "Barazi dhe mosdiskriminim"], "25": ["Транспарентност и отчетност", "Transparencë dhe llogaridhënie"], "26": ["Приватност и безбедност", "Privatësi dhe siguri"], "27": ["Нашите приоритети", "Prioritetet tona"], "28": ["Работа со цел и човечност", "Punë me qëllim dhe humanizëm"], "29": ["Програмските области се насочени кон практична поддршка, информирање и соработка со надлежните институции и стручни партнери.", "Fushat programore përqendrohen në mbështetje praktike, informim dhe bashkëpunim me institucionet kompetente dhe partnerët profesionistë."], "30": ["Човекови права", "Të drejtat e njeriut"], "31": ["Информирање за правата и постојните механизми за заштита, документирање системски прашања и подготовка на препораки до надлежните институции.", "Informim mbi të drejtat dhe mekanizmat ekzistues të mbrojtjes, dokumentim të çështjeve sistemike dhe përgatitje rekomandimesh për institucionet kompetente."], "32": ["Образование и вештини", "Arsim dhe aftësi"], "33": ["Развивање информативни работилници за животни вештини, комуникација, управување со лични финансии и подготовка за работа.", "Zhvillim i punëtorive informuese për aftësi jetësore, komunikim, menaxhim të financave personale dhe përgatitje për punë."], "34": ["Поддршка по излегување", "Mbështetje pas lirimit"], "35": ["Информации за лични документи, вработување и достапни услуги, како и упатување до соодветни организации и стручни служби.", "Informacione për dokumente personale, punësim dhe shërbime të disponueshme, si dhe referim te organizatat dhe shërbimet profesionale përkatëse."], "36": ["Поддршка на семејствата", "Mbështetje për familjet"], "37": ["Информативни средби и поврзување со достапни услуги и партнерски организации за семејствата и блиските лица.", "Takime informuese dhe lidhje me shërbime dhe organizata partnere për familjarët dhe të afërmit."], "38": ["Институционална соработка", "Bashkëpunim institucional"], "39": ["Соработка со институции, стручни лица, образовни установи, работодавачи и граѓански организации.", "Bashkëpunim me institucione, profesionistë, institucione arsimore, punëdhënës dhe organizata qytetare."], "40": ["Јавна свест", "Ndërgjegjësim publik"], "41": ["Едукативни материјали и јавни активности за намалување на стигмата и поттикнување одговорен, недискриминаторски пристап.", "Materiale edukative dhe veprimtari publike për uljen e stigmës dhe nxitjen e një qasjeje të përgjegjshme e jodiskriminuese."], "42": ["Предлог за ресоцијализација", "Propozim për risocializim"], "43": ["Модел од 100 поени", "Modeli me 100 pikë"], "44": ["Интерактивна едукативна симулација со десет области. Ова не е официјална институционална проценка и не создава право на условен отпуст.", "Simulim edukativ ndërveprues në dhjetë fusha. Ky nuk është vlerësim zyrtar institucional dhe nuk krijon të drejtë për lirim me kusht."], "45": ["Изберете вредности за да го видите примерот.", "Zgjidhni vlerat për të parë shembullin."], "46": ["Ресетирај", "Rivendos"], "47": ["А — Одговорност", "A — Përgjegjësia"], "48": ["Препознавање на постапките и поставување цели.", "Njohja e veprimeve dhe përcaktimi i qëllimeve."], "49": ["Б — Промена", "B — Ndryshimi"], "50": ["Образование, вештини и одговорно однесување.", "Arsim, aftësi dhe sjellje e përgjegjshme."], "51": ["В — Доказ", "C — Dëshmia"], "52": ["Проверлив напредок и исполнети цели.", "Përparim i verifikueshëm dhe qëllime të arritura."], "53": ["Г — Подготовка за излез", "D — Përgatitja për lirim"], "54": ["План за работа, домување и поддршка.", "Plan për punë, strehim dhe mbështetje."], "55": ["Годишна програма", "Programi vjetor"], "56": ["План за работа за 2027 година", "Plani i punës për vitin 2027"], "57": ["Активностите ќе се спроведуваат според достапните ресурси, капацитетите на платформата и потребните одобренија.", "Aktivitetet do të realizohen sipas burimeve të disponueshme, kapaciteteve të platformës dhe miratimeve të nevojshme."], "58": ["ЈАНУАРИ – МАРТ", "JANAR – MARS"], "59": ["Поставување основи", "Vendosja e bazave"], "60": ["Усвојување програма и оперативен календар.", "Miratimi i programit dhe kalendarit operativ."], "61": ["Подготовка на интерни правила.", "Përgatitja e rregullave të brendshme."], "62": ["Мапирање на потребите и партнерите.", "Identifikimi i nevojave dhe partnerëve."], "63": ["АПРИЛ – ЈУНИ", "PRILL – QERSHOR"], "64": ["Партнерства и подготовка", "Partneritete dhe përgatitje"], "65": ["Контакти со институции и стручни партнери.", "Kontakte me institucione dhe partnerë profesionistë."], "66": ["Подготовка на материјали за работилници.", "Përgatitja e materialeve për punëtori."], "67": ["Информативна активност и проектни предлози.", "Aktivitete informuese dhe propozime projektesh."], "68": ["ЈУЛИ – СЕПТЕМВРИ", "KORRIK – SHTATOR"], "69": ["Пилот-активности", "Aktivitete pilot"], "70": ["Работилници или информативни активности.", "Punëtori ose aktivitete informuese."], "71": ["Средба за семејства, ако има капацитет.", "Takim për familjet, nëse ka kapacitete."], "72": ["Анонимизирани повратни информации.", "Mbledhja e komenteve anonime."], "73": ["ОКТОМВРИ – ДЕКЕМВРИ", "TETOR – DHJETOR"], "74": ["Евалуација и отчетност", "Vlerësim dhe llogaridhënie"], "75": ["Анализа на резултатите.", "Analizë e rezultateve."], "76": ["Годишен наративен и финансиски извештај.", "Raport vjetor narrativ dhe financiar."], "77": ["Подготовка на план за 2028 година.", "Përgatitja e planit për vitin 2028."], "78": ["Нашиот пристап", "Qasja jonë"], "79": ["Промената почнува со можност.", "Ndryshimi fillon me një mundësi."], "80": ["Се стремиме кон практични чекори што го почитуваат достоинството и ги поврзуваат луѓето со информации, поддршка и соодветни услуги.", "Synojmë hapa praktikë që respektojnë dinjitetin dhe lidhin njerëzit me informacion, mbështetje dhe shërbime të përshtatshme."], "81": ["„Секој заслужува втора шанса!“", "“Çdokush meriton një shans të dytë!”"], "82": ["Мото на Платформата „Нов почеток“ – Скопје", "Motoja e platformës “Fillim i Ri” – Shkup"], "83": ["Што сакаме да постигнеме", "Çfarë duam të arrijmë"], "84": ["Подобра информираност", "Informim më i mirë"], "85": ["За права, можности и достапни услуги.", "Për të drejtat, mundësitë dhe shërbimet e disponueshme."], "86": ["Посилна соработка", "Bashkëpunim më i fortë"], "87": ["Со институции и организации што можат да помогнат.", "Me institucione dhe organizata që mund të ndihmojnë."], "88": ["Практични вештини", "Aftësi praktike"], "89": ["За образование, секојдневен живот и работа.", "Për arsim, jetë të përditshme dhe punë."], "90": ["Помалку стигма", "Më pak stigmë"], "91": ["Повеќе достоинство, разбирање и можности.", "Më shumë dinjitet, mirëkuptim dhe mundësi."], "92": ["Бидете дел од промената", "Bëhuni pjesë e ndryshimit"], "93": ["Заедно можеме повеќе.", "Së bashku mundemi më shumë."], "94": ["Отворени сме за соработка со граѓански организации, институции, стручни лица, образовни установи, работодавачи и донатори кои ги споделуваат нашите цели.", "Jemi të hapur për bashkëpunim me organizata qytetare, institucione, profesionistë, institucione arsimore, punëdhënës dhe donatorë që ndajnë qëllimet tona."], "95": ["Контактирајте нè", "Na kontaktoni"], "96": ["Контакт", "Kontakt"], "97": ["Поврзете се со „Нов почеток“", "Lidhuni me “Fillim i Ri”"], "98": ["За информации и можности за соработка, обратете ни се преку електронската пошта на платформата.", "Për informacione dhe mundësi bashkëpunimi, na kontaktoni përmes adresës elektronike të platformës."], "99": ["Граѓанска платформа „Нов почеток“", "Platforma qytetare “Fillim i Ri”"], "100": ["Секој заслужува втора шанса!", "Çdokush meriton një shans të dytë!"], "101": ["Адреса", "Adresa"], "102": ["Скопје, Северна Македонија", "Shkup, Maqedonia e Veriut"], "103": ["Веб-страница", "Uebfaqja"], "104": ["Е-пошта", "Email"], "105": ["Соработка и партнерства", "Bashkëpunim dhe partneritete"], "106": ["Заедничките активности може да опфатат едукација, информирање за права, ресоцијализација, поддршка на семејствата и кампањи против стигматизација.", "Aktivitetet e përbashkëta mund të përfshijnë edukim, informim mbi të drejtat, risocializim, mbështetje për familjet dhe fushata kundër stigmatizimit."], "107": ["Напомена:", "Shënim:"], "108": ["За прашања и предлози за соработка, пишете на нашата официјална е-пошта: zdnp.mk@gmail.com.", "Për pyetje dhe propozime bashkëpunimi, shkruani në adresën tonë zyrtare të emailit: zdnp.mk@gmail.com."], "109": ["Информациите на оваа веб-страница се општ информативен приказ на целите и планираните активности на платформата. Активностите во установи се спроведуваат само со потребните одобренија. Платформата не заменува надлежни институции ниту лиценцирани даватели на специјализирани услуги.", "Informacionet në këtë uebfaqe paraqesin qëllimet dhe aktivitetet e planifikuara të platformës. Aktivitetet në institucione realizohen vetëm me miratimet e nevojshme. Platforma nuk zëvendëson institucionet kompetente ose ofruesit e licencuar të shërbimeve të specializuara."], "110": ["НОВ ПОЧЕТОК · СКОПЈЕ", "FILLIM I RI · SHKUP"], "111": ["Независна граѓанска платформа „Нов почеток“ – Скопје. Сите права се задржани.", "Platformë e pavarur qytetare “Fillim i Ri” – Shkup. Të gjitha të drejtat e rezervuara."], "112": ["Назад на врв ↑", "Kthehu lart ↑"]};
+window.criteriaSq = ["Marrja e përgjegjësisë", "Sjellja dhe respektimi i rregullave", "Pjesëmarrja në programe risocializimi", "Arsimi dhe zhvillimi personal", "Zanati dhe aftësimi profesional", "Shprehitë e punës dhe përgjegjësia", "Komunikimi dhe zgjidhja e konflikteve", "Stabiliteti personal dhe shprehitë e shëndetshme", "Përgjegjësia ndaj familjes dhe shoqërisë", "Plani për jetën pas lirimit"];
+window.messagesSq = ["Nevojitet mbështetje e shtuar dhe plan individual.", "Përparim fillestar ose i pjesshëm.", "Përparim i mirë sipas kritereve ilustruese.", "Shkallë e lartë përparimi.", "Shkallë shumë e lartë përparimi sipas modelit ilustrues."];
+window.currentLang='mk';
+function setLanguage(lang){
+  window.currentLang=lang==='sq'?'sq':'mk';
+  document.documentElement.lang=window.currentLang;
+  for(const el of document.querySelectorAll('[data-i18n]')){
+    const entry=i18nTexts[el.dataset.i18n];if(entry)el.textContent=entry[window.currentLang==='sq'?1:0];
+  }
+  document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===window.currentLang)));
+  document.querySelectorAll('#scoreFields label').forEach((el,i)=>{el.textContent=(i+1)+'. '+(window.currentLang==='sq'?window.criteriaSq[i]:criteria[i]);});
+  const total=document.getElementById('totalScore');
+  if(total&&Number(total.textContent.split('/')[0])===0){document.getElementById('scoreMeaning').textContent=window.currentLang==='sq'?'Zgjidhni vlerat për të parë shembullin.':'Изберете вредности за да го видите примерот.';}
+  else if(typeof updateScore==='function')updateScore();
+  document.title=window.currentLang==='sq'?'Fillim i Ri – Çdokush meriton një shans të dytë!':'Нов почеток – Секој заслужува втора шанса!';
+  document.querySelector('meta[name="description"]').content=window.currentLang==='sq'?'Platformë e pavarur qytetare Fillim i Ri – Shkup. Të drejtat e njeriut, mbështetje dhe risocializim.':'Независна граѓанска платформа „Нов почеток“ – Скопје. Човекови права, достоинство, поддршка и ресоцијализација.';
+  try{localStorage.setItem('zdnp-lang',window.currentLang)}catch(e){}
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
+let preferred='mk';try{preferred=localStorage.getItem('zdnp-lang')||'mk'}catch(e){}
+setLanguage(preferred);
 </script></body>
 </html>
