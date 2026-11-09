@@ -129,6 +129,56 @@ outline:2px solid #1b5c83;outline-offset:2px
 #zdnpContactForm button{cursor:pointer;margin-top:8px}
 .form-privacy{font-size:.83rem;line-height:1.5}
 </style>
+
+<style id="zdnp-responsive-audit">
+/* ZDNP RESPONSIVE AUDIT FIX 2026 */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word;overflow-x:hidden}
+img,svg,video,iframe{max-width:100%;height:auto}
+.container{max-width:1140px}
+.nav{flex-wrap:wrap}
+.brand{min-width:0;flex:0 1 auto}
+nav{flex-wrap:wrap;justify-content:flex-end;gap:12px 17px}
+nav a,.language-switch button,.menu-toggle{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+nav a:focus-visible,.language-switch button:focus-visible,.menu-toggle:focus-visible,.button:focus-visible{outline:3px solid #e5a326;outline-offset:3px}
+#zdnpContactForm input,#zdnpContactForm textarea{font-size:16px;min-height:46px;max-width:100%}
+#zdnpContactForm textarea{min-height:132px;resize:vertical}
+#zdnpContactForm button{min-height:48px}
+.footer-row a{min-height:44px;display:inline-flex;align-items:center}
+@media(max-width:1050px){.nav{gap:10px}.brand img{width:50px;height:50px}nav{gap:8px 12px}nav a{font-size:.85rem}}
+@media(max-width:820px){
+ .nav{min-height:70px;gap:8px}
+ .menu-toggle{display:inline-flex;order:3}
+ .language-switch{order:2;margin-left:auto}
+ nav{display:none;order:4;flex:0 0 100%;width:100%;position:static;padding:8px 0 14px;box-shadow:none;border:0;flex-direction:column;align-items:stretch;gap:0;background:#fff}
+ nav.open{display:flex}
+ nav a{padding:10px 12px;border-bottom:1px solid #edf1f5;font-size:1rem;justify-content:flex-start}
+ nav .nav-cta{margin-top:8px;justify-content:center}
+ .hero-inner{grid-template-columns:1fr;gap:24px;padding:55px 0}
+ .hero-mark{grid-row:1}.hero-mark img{width:min(210px,55vw)}
+ .hero-copy{text-align:center}.hero-copy .eyebrow,.hero-actions{justify-content:center}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .about-grid,.impact-grid,.contact-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ .container{width:min(100% - 32px,1140px)}
+ .topline .container{padding:7px 0}
+ .brand strong{font-size:.88rem}.brand small{font-size:.69rem}
+ .brand img{width:42px;height:42px}
+ .language-switch button{padding:6px 9px}
+ .hero-inner{padding:40px 0 52px}
+ .hero h1{font-size:clamp(2.1rem,9vw,3.4rem)}
+ .cards,.timeline,.phase-grid,.trustbar .container{grid-template-columns:1fr}
+ .join-box,.contact-info,.contact-note{padding:22px}
+ .footer-row{align-items:flex-start;flex-direction:column;gap:10px}
+ .score-field{min-width:0}
+}
+@supports(padding:max(0px)){
+ footer{padding-bottom:max(28px,env(safe-area-inset-bottom))}
+ .container{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right))}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
 </head>
 <body>
 <div class="topline"><div class="container"><span><span data-i18n="0">Независна граѓанска платформа „Нов почеток“ – Скопје</span></span><span><span data-i18n="1">Човекови права • Поддршка • Ресоцијализација</span></span></div></div>
@@ -320,5 +370,23 @@ function setLanguage(lang){
 document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
 let preferred='mk';try{preferred=localStorage.getItem('zdnp-lang')||'mk'}catch(e){}
 setLanguage(preferred);
-</script></body>
+</script>
+<script id="zdnp-a11y-fix">
+(function(){
+ const btn=document.getElementById('menuToggle');
+ const nav=document.getElementById('mainNav');
+ if(!btn||!nav)return;
+ document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&nav.classList.contains('open')){
+   nav.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.textContent='☰';btn.focus();
+  }
+ });
+ window.addEventListener('resize',function(){
+  if(window.innerWidth>820&&nav.classList.contains('open')){
+   nav.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.textContent='☰';
+  }
+ });
+})();
+</script>
+</body>
 </html>
