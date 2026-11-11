@@ -1,9 +1,9 @@
-# Phase 9: database-backed case workflow (internal prototype)
+# Phase 9 — PostgreSQL transaction and audit integration
 
-Internal-only service with transactional state updates and audit events. No HTTP endpoints, no production authentication, no confidential complaint processing.
+Migration `database/migrations/004_case_transitions.sql` implements a narrowly scoped SECURITY DEFINER function for four state changes (assign, forward, answer, close). It checks enabled staff, role, institution, confidential flag, state, assignment, and locks the case row. The case update and audit insert are atomic.
 
-**Security boundary:** The caller must supply a principal verified by a trusted server-side OIDC/MFA integration; `verified` flags are NOT cryptographic proof and MUST NEVER be accepted from request JSON, headers or a browser. Database staff role is checked on every command.
+The restricted `zdnp_app` role has EXECUTE on this function but **no direct INSERT/UPDATE grants**. PostgreSQL 16 integration tests exercise successful transitions, cross-institution denial, confidential denial, wrong-role denial, duplicate action rejection, and event count. The CI-only database and identities are fictional.
 
-**Deployment blocker:** The existing PostgreSQL RLS policy deliberately denies writes to `cases` and `case_events`. This service therefore cannot write under the existing restricted application role. A carefully scoped database security-definer function or dedicated mutation authorization design and integration tests are required before it can be enabled. Never grant unrestricted table UPDATE/INSERT to bypass the RLS boundary.
+**Critical trust boundary:** The function takes an OIDC subject and cannot itself verify a JWT. Only a private backend which verifies OIDC signature, issuer, audience, expiry, MFA and maps the verified token subject may call it. A database client with application credentials could impersonate any subject; these credentials must never be exposed to users, browsers, plugins or untrusted workloads. This is a development-stage design, not a completed production authorization boundary.
 
-Run `npm test` for mock-transaction tests. Real DB integration, identity provider, retention, independent complaint routing and institutional approvals are still required.
+The earlier `workflow.js` remains an illustrative internal service and is **not wired to the new function**. The integration test invokes the database function directly. Do not deploy or collect real data without security review, independent confidential-complaint routing, institutional agreements, credential separation, and verified backend integration.
