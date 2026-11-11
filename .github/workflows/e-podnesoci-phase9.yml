@@ -20,4 +20,7 @@ jobs:
         with:
           node-version: '22'
       - working-directory: phase9-workflow
-        run: npm run check && npm test
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm test
