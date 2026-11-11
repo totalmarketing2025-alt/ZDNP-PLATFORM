@@ -1,0 +1,9 @@
+{
+  "name": "zdnp-phase8-portal-policy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check workflow.js && node --check admin.js"
+  }
+}
