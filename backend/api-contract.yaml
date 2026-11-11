@@ -1,0 +1,59 @@
+openapi: 3.1.0
+info:
+  title: ZDNP e-PODNESOCI draft API
+  version: 0.1.0
+  description: Design contract only; endpoints are NOT implemented or deployed.
+servers:
+  - url: https://example.invalid
+paths:
+  /api/v1/health:
+    get:
+      summary: Service health (no personal data)
+      responses:
+        '200':
+          description: Healthy
+  /api/v1/me:
+    get:
+      summary: Authenticated staff identity and institution scope
+      security:
+        - staffSession: []
+      responses:
+        '200':
+          description: Current identity
+        '401':
+          description: Unauthenticated
+  /api/v1/cases:
+    get:
+      summary: Institution-scoped authorized cases
+      security:
+        - staffSession: []
+      responses:
+        '200':
+          description: Filtered cases
+        '403':
+          description: Forbidden
+  /api/v1/cases/{id}/events:
+    get:
+      summary: Authorized audit history for one case
+      security:
+        - staffSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Case events
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+components:
+  securitySchemes:
+    staffSession:
+      type: apiKey
+      in: cookie
+      name: __Host-zdnp_session
