@@ -14,7 +14,7 @@ export function createApp({pool,verify=verifyBearer}){
   try{
    await client.query('BEGIN READ ONLY');
    // Identity is resolved server-side; never trust institution or role from client.
-   const found=await client.query('SELECT id,institution_id,role,display_name FROM staff_users WHERE identity_provider_subject=$1 AND enabled=true LIMIT 1',[subject]);
+   const found=await client.query('SELECT * FROM auth_private.lookup_staff($1)',[subject]);
    const staff=found.rows[0];
    if(!staff||!allowedRole(staff.role)){await client.query('ROLLBACK');return send(403,{error:'forbidden'})}
    await client.query("SELECT set_config('app.institution_id',$1,true)",[staff.institution_id]);
