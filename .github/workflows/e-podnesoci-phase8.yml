@@ -1,0 +1,23 @@
+name: e-PODNESOCI phase 8 policy checks
+on:
+  push:
+    branches: [feature/e-podnesoci]
+    paths:
+      - 'phase8-portal/**'
+      - '.github/workflows/e-podnesoci-phase8.yml'
+  pull_request:
+    paths:
+      - 'phase8-portal/**'
+      - '.github/workflows/e-podnesoci-phase8.yml'
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: phase8-portal
+        run: npm run check && npm test
