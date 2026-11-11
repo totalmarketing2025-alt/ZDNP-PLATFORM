@@ -1,0 +1,48 @@
+name: e-PODNESOCI sandbox tests
+on:
+  push:
+    branches:
+      - feature/e-podnesoci
+    paths:
+      - 'sandbox-backend/**'
+      - '.github/workflows/e-podnesoci-sandbox.yml'
+  pull_request:
+    paths:
+      - 'sandbox-backend/**'
+      - '.github/workflows/e-podnesoci-sandbox.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check sandbox-backend/core.js
+          node --check sandbox-backend/server.js
+          node --check sandbox-backend/core.test.js
+      - name: Unit tests
+        working-directory: sandbox-backend
+        run: npm test
+      - name: HTTP smoke tests
+        working-directory: sandbox-backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          node server.js > /tmp/zdnp-sandbox.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8789/health > /tmp/zdnp-health.json; then break; fi
+            sleep 1
+          done
+          node -e "const x=require('/tmp/zdnp-health.json');if(x.status!=='demo-only')process.exit(1)"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8789/api/cases)" = "401"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'x-demo-user: demo-pri-educator' http://127.0.0.1:8789/api/cases/DEMO-IDR-001)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'x-demo-user: demo-idr-admin' http://127.0.0.1:8789/api/cases/DEMO-IDR-001)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'x-demo-user: demo-idr-educator' http://127.0.0.1:8789/api/cases/DEMO-IDR-001)" = "200"
