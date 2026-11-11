@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {planTransition} from './workflow.js';
+import {planStaffChange} from './admin.js';
+const actor={id:'e1',institutionId:'IDR',role:'educator'};
+const record={id:'c1',institutionId:'IDR',status:'received',assignedTo:null,confidential:false,forwarded:false};
+test('educator can plan assignment',()=>assert.equal(planTransition({caseRecord:record,actor,action:'assign'}).nextStatus,'assigned'));
+test('cross-institution mutation denied',()=>assert.equal(planTransition({caseRecord:record,actor:{...actor,institutionId:'PRI'},action:'assign'}).ok,false));
+test('confidential complaints denied in ordinary workflow',()=>assert.equal(planTransition({caseRecord:{...record,confidential:true},actor,action:'assign'}).ok,false));
+test('director cannot answer before forwarding',()=>assert.equal(planTransition({caseRecord:{...record,status:'forwarded'},actor:{...actor,role:'director'},action:'answer'}).ok,false));
+test('admin cannot change another institution',()=>assert.equal(planStaffChange({admin:{id:'a',role:'institution_admin',mfaVerified:true,institutionId:'IDR'},target:{id:'b',institutionId:'PRI'},action:'disable'}).ok,false));
+test('admin cannot disable self',()=>assert.equal(planStaffChange({admin:{id:'a',role:'institution_admin',mfaVerified:true,institutionId:'IDR'},target:{id:'a',institutionId:'IDR'},action:'disable'}).ok,false));
+test('admin needs MFA',()=>assert.equal(planStaffChange({admin:{id:'a',role:'institution_admin',mfaVerified:false,institutionId:'IDR'},target:{id:'b',institutionId:'IDR'},action:'disable'}).ok,false));
