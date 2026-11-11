@@ -1,0 +1,12 @@
+{
+  "name": "zdnp-phase9-transaction-workflow",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check workflow.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.3"
+  }
+}
