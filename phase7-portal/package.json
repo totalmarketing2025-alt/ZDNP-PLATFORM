@@ -1,0 +1,14 @@
+{
+  "name": "zdnp-phase7-private-portal",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check server.js && node --check identity.js"
+  },
+  "dependencies": {
+    "jose": "^5.10.0",
+    "pg": "^8.13.3"
+  }
+}
