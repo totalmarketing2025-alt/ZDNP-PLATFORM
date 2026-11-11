@@ -4,8 +4,6 @@ import pg from 'pg';
 import {createDatabase} from './db.js';
 const url=process.env.TEST_DATABASE_URL;
 const skip=!url;
-const idr='00000000-0000-4000-8000-000000000001';
-const pri='00000000-0000-4000-8000-000000000002';
 const ed='00000000-0000-4000-8000-000000000011';
 const dir='00000000-0000-4000-8000-000000000012';
 const other='00000000-0000-4000-8000-000000000013';
@@ -15,7 +13,12 @@ test('PostgreSQL RLS prevents cross-institution and unauthorized case reads',{sk
  const db=createDatabase(process.env.APP_DATABASE_URL);
  try{
   await owner.query('BEGIN');
-  await owner.query("INSERT INTO institutions(id,code,name) VALUES ($1,'IDR','Идризово'),($2,'PRI','Прилеп') ON CONFLICT(code) DO UPDATE SET name=EXCLUDED.name",[idr,pri]);
+  // Migration 001 already seeds these institutions with generated UUIDs.
+  // Reuse those canonical IDs instead of trying to overwrite existing rows.
+  const institutionRows=await owner.query("SELECT code,id FROM institutions WHERE code IN ('IDR','PRI')");
+  const ids=Object.fromEntries(institutionRows.rows.map(r=>[r.code,r.id]));
+  const idr=ids.IDR, pri=ids.PRI;
+  assert.ok(idr && pri,'migration 001 must seed IDR and PRI');
   await owner.query("INSERT INTO staff_users(id,institution_id,email,display_name,role,enabled) VALUES ($1,$2,'ed@example.invalid','Demo Educator','educator',true),($3,$2,'dir@example.invalid','Demo Director','director',true),($4,$5,'other@example.invalid','Demo Other','educator',true)",[ed,idr,dir,other,pri]);
   await owner.query("INSERT INTO cases(institution_id,case_number,category,subject,encrypted_payload,status,assigned_to) VALUES ($1,'TEST-IDR-001','request','IDR intake',decode('aa','hex'),'received',NULL),($2,'TEST-PRI-001','request','PRI intake',decode('aa','hex'),'received',NULL),($1,'TEST-IDR-002','question','IDR director',decode('aa','hex'),'forwarded',$3),($1,'TEST-IDR-003','complaint','IDR confidential',decode('aa','hex'),'triage',NULL)",[idr,pri,ed]);
   await owner.query("UPDATE cases SET confidential=true WHERE case_number='TEST-IDR-003'");
