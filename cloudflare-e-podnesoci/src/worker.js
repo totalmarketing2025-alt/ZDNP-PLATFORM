@@ -44,7 +44,7 @@ export default {async fetch(request,env){
     env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','+8 hours'))").bind(tokenHash,user.id),
     env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(user.institution_id,user.id,'login')
    ]);
-   return json({ok:true,mustChangePassword:!!user.must_change_password},{valueOf(){return 200}}.valueOf(),{'set-cookie':`sid=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`});
+   return json({ok:true,mustChangePassword:!!user.must_change_password},200,{'set-cookie':`sid=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`});
   }
   const actor=await current(env.DB,request);
   if(!actor)return json({error:'unauthorized'},401);
