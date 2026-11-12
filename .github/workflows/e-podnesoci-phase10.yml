@@ -20,4 +20,7 @@ jobs:
         with:
           node-version: '22'
       - working-directory: phase10-admin
-        run: npm run check && npm test
+        run: |
+          npm run check
+          node --check server.js
+          npm test
