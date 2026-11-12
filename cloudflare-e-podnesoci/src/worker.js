@@ -25,6 +25,7 @@ async function current(db,request){
 async function parse(request){const raw=await request.text();if(raw.length>12000)throw Error('payload too large');return JSON.parse(raw||'{}')}
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname,method=request.method;
+ if(!path.startsWith('/api/'))return env.ASSETS?env.ASSETS.fetch(request):json({error:'assets unavailable'},503);
  if(path==='/api/health'&&method==='GET')return json({ok:true,environment:'staging'});
  if(!env.DB)return json({error:'D1 not configured'},503);
  if(method!=='GET'){
