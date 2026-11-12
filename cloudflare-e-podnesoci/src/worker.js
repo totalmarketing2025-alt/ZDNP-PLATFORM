@@ -39,7 +39,14 @@ export default {async fetch(request,env){
    const {username,password}=await parse(request);
    if(!userName(username)||typeof password!=='string')return json({error:'invalid credentials'},401);
    const user=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();
-   if(!user||!user.enabled||user.locked_until&&new Date(user.locked_until)>new Date()||!await passwordVerify(password,user.password_hash))return json({error:'invalid credentials'},401);
+   if(!user||!user.enabled)return json({error:'invalid credentials'},401);
+   if(user.locked_until&&new Date(user.locked_until.replace(' ','T')+'Z')>new Date())return json({error:'invalid credentials'},401);
+   if(!await passwordVerify(password,user.password_hash)){
+    await env.DB.prepare(`UPDATE users SET failed_attempts=failed_attempts+1,
+     locked_until=CASE WHEN failed_attempts+1>=5 THEN datetime('now','+15 minutes') ELSE NULL END WHERE id=?`).bind(user.id).run();
+    return json({error:'invalid credentials'},401);
+   }
+   await env.DB.prepare('UPDATE users SET failed_attempts=0,locked_until=NULL WHERE id=?').bind(user.id).run();
    const token=random(),tokenHash=await hash(token);
    await env.DB.batch([
     env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','+8 hours'))").bind(tokenHash,user.id),
