@@ -3,6 +3,7 @@ import {randomBytes,scryptSync,timingSafeEqual,createHash} from 'node:crypto';
 import {readFile,writeFile,rename} from 'node:fs/promises';
 const path=process.env.ADMIN_DATA_FILE||'./admin-data.json';
 const sessions=new Map();
+const dashboardUrl=new URL('./dashboard.html',import.meta.url);
 const roles=['educator','director','service_head','archivist','institution_admin'];
 const hash=(s,salt=randomBytes(16).toString('hex'))=>salt+':'+scryptSync(s,salt,64).toString('hex');
 const verify=(s,h)=>{try{const [salt,digest]=h.split(':');return timingSafeEqual(Buffer.from(digest,'hex'),scryptSync(s,salt,64))}catch{return false}};
@@ -15,6 +16,8 @@ const attempts=new Map();
 export function createServer(){
  return http.createServer(async(req,res)=>{
   const route=new URL(req.url,'http://localhost').pathname;
+  if(req.method==='GET'&&route==='/'){const html=await readFile(dashboardUrl);res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(html);return}
+  if(req.method==='POST'){const origin=req.headers.origin;if(origin&&origin!==`http://127.0.0.1:${process.env.PORT||8792}`)return send(res,403,{error:'invalid origin'})}
   if(req.method==='GET'&&route==='/health')return send(res,200,{status:'ok',mode:'local-demo'});
   try{
    const db=await read();
@@ -37,7 +40,7 @@ export function createServer(){
    const actor=session&&session.expires>Date.now()&&db.users.find(u=>u.id===session.id&&u.enabled);
    if(!actor)return send(res,401,{error:'unauthorized'});
    if(req.method==='POST'&&route==='/logout'){sessions.delete(tokenHash(cookie[1]));return send(res,200,{ok:true},{'set-cookie':'sid=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0'})}
-   if(req.method==='GET'&&route==='/me')return send(res,200,{username:actor.username,role:actor.role,institutionId:actor.institutionId});
+   if(req.method==='GET'&&route==='/me')return send(res,200,{id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institutionId});
    if(actor.role!=='institution_admin')return send(res,403,{error:'admin only'});
    if(req.method==='GET'&&route==='/users')return send(res,200,{users:db.users.filter(u=>u.institutionId===actor.institutionId).map(({passwordHash,...u})=>u)});
    if(req.method==='GET'&&route==='/analytics'){
