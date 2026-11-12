@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check repository.js && node --check integration.test.js"
+    "check": "node --check repository.js && node --check auth.js && node --check integration.test.js && node --check auth.test.js"
   },
   "dependencies": {
     "pg": "^8.13.3"
