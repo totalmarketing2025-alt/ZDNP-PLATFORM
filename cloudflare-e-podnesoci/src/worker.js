@@ -48,6 +48,12 @@ async function current(db,request){
 async function parse(request){const raw=await request.text();if(raw.length>12000)throw Error('payload too large');return JSON.parse(raw||'{}')}
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname,method=request.method;
+ // Public demo is a static mock only: no sessions, API or D1 access.
+ if(path==='/demo'&&method==='GET'){
+  if(!env.ASSETS)return json({error:'demo assets unavailable'},503);
+  const demoUrl=new URL(request.url);demoUrl.pathname='/demo.html';
+  return env.ASSETS.fetch(new Request(demoUrl,request));
+ }
  if(!await verifyAccess(request,env))return json({error:'Cloudflare Access required'},403);
  if(!path.startsWith('/api/')){
   if(method!=='GET'&&method!=='HEAD')return json({error:'method not allowed'},405);
