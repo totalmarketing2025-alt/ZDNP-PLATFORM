@@ -38,9 +38,12 @@ export default {async fetch(request,env){
   if(path!=='/najava'&&path!=='/dashboard')return json({error:'not found'},404);
   if(!env.ASSETS)return json({error:'assets unavailable'},503);
   // The Worker owns only explicitly routed portal paths; the existing website remains on Pages.
-  const assetUrl=new URL(request.url);assetUrl.pathname='/index.html';
+  // Workers Static Assets canonicalizes /index.html to / (HTTP 307).
+  // Fetch the canonical root internally; the public URL stays /najava or /dashboard.
+  const assetUrl=new URL(request.url);assetUrl.pathname='/';assetUrl.search='';
   const asset=await env.ASSETS.fetch(new Request(assetUrl,request));
-  if(!asset.ok)return json({error:'portal asset unavailable',assetStatus:asset.status},503,{'x-zdnp-worker':'portal'});
+  if(!asset.ok||asset.status>=300&&asset.status<400)return json({error:'portal asset unavailable',assetStatus:asset.status},503,{'x-zdnp-worker':'portal'});
+  if(!(asset.headers.get('content-type')||'').toLowerCase().includes('text/html'))return json({error:'portal asset is not HTML'},503,{'x-zdnp-worker':'portal'});
   const headers=new Headers(asset.headers);
   headers.set('cache-control','no-store');
   headers.set('x-zdnp-worker','portal');
