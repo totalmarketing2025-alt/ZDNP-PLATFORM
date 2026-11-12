@@ -3,3 +3,7 @@ test('password hash is salted and plaintext is not stored',async()=>{const a=awa
 test('weak password rejected',async()=>await assert.rejects(()=>passwordHash('plata2020')));
 test('missing D1 fails closed',async()=>{const response=await worker.fetch(new Request('https://staging.example.invalid/api/login',{method:'POST',headers:{'content-type':'application/json'},body:'{}'}),{});assert.equal(response.status,503)});
 test('cross-origin login requests are rejected',async()=>{const response=await worker.fetch(new Request('https://staging.example.invalid/api/login',{method:'POST',headers:{origin:'https://attacker.invalid','content-type':'application/json'},body:'{}'}),{DB:{}});assert.equal(response.status,403)});
+
+test('portal page requires asset binding',async()=>{const r=await worker.fetch(new Request('https://zdnp.org/najava'),{});assert.equal(r.status,503)});
+test('portal page is served from Worker assets, not main website',async()=>{let requested='';const r=await worker.fetch(new Request('https://zdnp.org/najava'),{ASSETS:{fetch:async req=>{requested=new URL(req.url).pathname;return new Response('<h1>Најава</h1>',{headers:{'content-type':'text/html'}})}}});assert.equal(r.status,200);assert.equal(requested,'/index.html');assert.equal(r.headers.get('x-zdnp-worker'),'portal')});
+test('missing portal asset fails with explicit diagnostic',async()=>{const r=await worker.fetch(new Request('https://zdnp.org/najava'),{ASSETS:{fetch:async()=>new Response('not found',{status:404})}});assert.equal(r.status,503)});

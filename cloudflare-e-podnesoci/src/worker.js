@@ -39,9 +39,15 @@ export default {async fetch(request,env){
   if(!env.ASSETS)return json({error:'assets unavailable'},503);
   // The Worker owns only explicitly routed portal paths; the existing website remains on Pages.
   const assetUrl=new URL(request.url);assetUrl.pathname='/index.html';
-  return env.ASSETS.fetch(new Request(assetUrl,request));
+  const asset=await env.ASSETS.fetch(new Request(assetUrl,request));
+  if(!asset.ok)return json({error:'portal asset unavailable',assetStatus:asset.status},503,{'x-zdnp-worker':'portal'});
+  const headers=new Headers(asset.headers);
+  headers.set('cache-control','no-store');
+  headers.set('x-zdnp-worker','portal');
+  headers.set('x-content-type-options','nosniff');
+  return new Response(asset.body,{status:asset.status,headers});
  }
- if(path==='/api/health'&&method==='GET')return json({ok:true,environment:'staging'});
+ if(path==='/api/health'&&method==='GET')return json({ok:true,service:'zdnp-e-podnesoci'});
  if(!env.DB)return json({error:'D1 not configured'},503);
  if(method!=='GET'){
   const origin=request.headers.get('origin');
