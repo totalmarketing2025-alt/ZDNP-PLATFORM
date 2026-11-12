@@ -6,7 +6,7 @@ workers_dev = false
 [[d1_databases]]
 binding = "DB"
 database_name = "zdnp-e-podnesoci-staging"
-database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+database_id = "73e44e6f-fba1-4b17-b223-9d9c265ddcd1"
 migrations_dir = "migrations"
 
 [vars]
