@@ -11,6 +11,29 @@ const pbkdf=async(password,salt,iterations=310000)=>{
 const secureCompare=(a,b)=>{if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
 export async function passwordHash(password){if(typeof password!=='string'||password.length<12||password.length>256)throw Error('password policy');const salt=random();return 'pbkdf2-sha256:310000:'+salt+':'+await pbkdf(password,salt)}
 async function passwordVerify(password,stored){try{const [algo,count,salt,value]=stored.split(':');if(algo!=='pbkdf2-sha256'||Number(count)!==310000||!password||password.length>256)return false;return secureCompare(value,await pbkdf(password,salt))}catch{return false}}
+// Cloudflare Access verification is mandatory before serving any route, including assets.
+// Reject unsigned/untrusted assertions; never trust identity headers without a verified JWT.
+const decode64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(s.length/4)*4,'=')),c=>c.charCodeAt(0));
+async function verifyAccess(request,env){
+ const team=env.ACCESS_TEAM_DOMAIN,aud=env.ACCESS_AUD;
+ if(!team||!aud||!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(team))return false;
+ const token=request.headers.get('cf-access-jwt-assertion');
+ if(!token)return false;
+ try{
+  const parts=token.split('.');if(parts.length!==3)return false;
+  const header=JSON.parse(new TextDecoder().decode(decode64(parts[0])));
+  const payload=JSON.parse(new TextDecoder().decode(decode64(parts[1])));
+  const now=Math.floor(Date.now()/1000);
+  if(header.alg!=='RS256'||!header.kid||payload.iss!==team||!Array.isArray(payload.aud)||!payload.aud.includes(aud)||typeof payload.exp!=='number'||payload.exp<=now||typeof payload.iat!=='number'||payload.iat>now+60||payload.nbf&&payload.nbf>now)return false;
+  const res=await fetch(team+'/cdn-cgi/access/certs');
+  if(!res.ok)return false;
+  const jwks=await res.json();
+  const jwk=jwks.keys?.find(k=>k.kid===header.kid&&k.kty==='RSA'&&(!k.alg||k.alg==='RS256'));
+  if(!jwk)return false;
+  const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+  return await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,decode64(parts[2]),bytes(parts[0]+'.'+parts[1]));
+ }catch{return false}
+}
 const roles=new Set(['educator','director','service_head','archivist','institution_admin']);
 const userName=s=>typeof s==='string'&&/^[a-zA-Z0-9_.-]{3,32}$/.test(s);
 const audit=(db,actor,action,target)=>db.prepare('INSERT INTO audit_events(institution_id,actor_id,target_id,action) VALUES(?,?,?,?)').bind(actor.institution_id,actor.id,target||null,action).run();
@@ -25,6 +48,7 @@ async function current(db,request){
 async function parse(request){const raw=await request.text();if(raw.length>12000)throw Error('payload too large');return JSON.parse(raw||'{}')}
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname,method=request.method;
+ if(!await verifyAccess(request,env))return json({error:'Cloudflare Access required'},403);
  if(!path.startsWith('/api/'))return env.ASSETS?env.ASSETS.fetch(request):json({error:'assets unavailable'},503);
  if(path==='/api/health'&&method==='GET')return json({ok:true,environment:'staging'});
  if(!env.DB)return json({error:'D1 not configured'},503);
@@ -111,12 +135,12 @@ export default {async fetch(request,env){
   if(match&&method==='POST'){
    const [,id,action]=match;
    if(id===actor.id)return json({error:'cannot modify self'},403);
-   const target=central?await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=?').bind(id).first():await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=? AND institution_id=?').bind(id,target.institution_id).first();
+   const target=central?await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=?').bind(id).first():await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=? AND institution_id=?').bind(id,actor.institution_id).first();
    if(!target||target.global_admin===1)return json({error:'forbidden'},403);
    const statements=[];
    if(action==='reset-password'){
     const b=await parse(request);statements.push(env.DB.prepare('UPDATE users SET password_hash=?,must_change_password=1 WHERE id=? AND institution_id=?').bind(await passwordHash(b.password),id,target.institution_id));
-   }else statements.push(env.DB.prepare('UPDATE users SET enabled=0 WHERE id=? AND institution_id=?').bind(id,actor.institution_id));
+   }else statements.push(env.DB.prepare('UPDATE users SET enabled=0 WHERE id=? AND institution_id=?').bind(id,target.institution_id));
    statements.push(env.DB.prepare('DELETE FROM sessions WHERE user_id=?').bind(id));
    statements.push(env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,target_id,action) VALUES(?,?,?,?)').bind(target.institution_id,actor.id,id,action));
    await env.DB.batch(statements);return json({ok:true});
