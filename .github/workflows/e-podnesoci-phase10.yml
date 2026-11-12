@@ -1,0 +1,23 @@
+name: e-PODNESOCI phase 10 admin policy
+on:
+  push:
+    branches: [feature/e-podnesoci]
+    paths:
+      - 'phase10-admin/**'
+      - '.github/workflows/e-podnesoci-phase10.yml'
+  pull_request:
+    paths:
+      - 'phase10-admin/**'
+      - '.github/workflows/e-podnesoci-phase10.yml'
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: phase10-admin
+        run: npm run check && npm test
