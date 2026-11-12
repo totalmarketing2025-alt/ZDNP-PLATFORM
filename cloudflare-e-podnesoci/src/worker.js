@@ -49,7 +49,14 @@ async function parse(request){const raw=await request.text();if(raw.length>12000
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname,method=request.method;
  if(!await verifyAccess(request,env))return json({error:'Cloudflare Access required'},403);
- if(!path.startsWith('/api/'))return env.ASSETS?env.ASSETS.fetch(request):json({error:'assets unavailable'},503);
+ if(!path.startsWith('/api/')){
+  if(method!=='GET'&&method!=='HEAD')return json({error:'method not allowed'},405);
+  if(path!=='/najava'&&path!=='/dashboard')return json({error:'not found'},404);
+  if(!env.ASSETS)return json({error:'assets unavailable'},503);
+  // The Worker owns only explicitly routed portal paths; the existing website remains on Pages.
+  const assetUrl=new URL(request.url);assetUrl.pathname='/index.html';
+  return env.ASSETS.fetch(new Request(assetUrl,request));
+ }
  if(path==='/api/health'&&method==='GET')return json({ok:true,environment:'staging'});
  if(!env.DB)return json({error:'D1 not configured'},503);
  if(method!=='GET'){
