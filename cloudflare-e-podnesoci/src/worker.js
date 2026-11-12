@@ -11,29 +11,6 @@ const pbkdf=async(password,salt,iterations=310000)=>{
 const secureCompare=(a,b)=>{if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
 export async function passwordHash(password){if(typeof password!=='string'||password.length<12||password.length>256)throw Error('password policy');const salt=random();return 'pbkdf2-sha256:310000:'+salt+':'+await pbkdf(password,salt)}
 async function passwordVerify(password,stored){try{const [algo,count,salt,value]=stored.split(':');if(algo!=='pbkdf2-sha256'||Number(count)!==310000||!password||password.length>256)return false;return secureCompare(value,await pbkdf(password,salt))}catch{return false}}
-// Cloudflare Access verification is mandatory before serving any route, including assets.
-// Reject unsigned/untrusted assertions; never trust identity headers without a verified JWT.
-const decode64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(s.length/4)*4,'=')),c=>c.charCodeAt(0));
-async function verifyAccess(request,env){
- const team=env.ACCESS_TEAM_DOMAIN,aud=env.ACCESS_AUD;
- if(!team||!aud||!/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(team))return false;
- const token=request.headers.get('cf-access-jwt-assertion');
- if(!token)return false;
- try{
-  const parts=token.split('.');if(parts.length!==3)return false;
-  const header=JSON.parse(new TextDecoder().decode(decode64(parts[0])));
-  const payload=JSON.parse(new TextDecoder().decode(decode64(parts[1])));
-  const now=Math.floor(Date.now()/1000);
-  if(header.alg!=='RS256'||!header.kid||payload.iss!==team||!Array.isArray(payload.aud)||!payload.aud.includes(aud)||typeof payload.exp!=='number'||payload.exp<=now||typeof payload.iat!=='number'||payload.iat>now+60||payload.nbf&&payload.nbf>now)return false;
-  const res=await fetch(team+'/cdn-cgi/access/certs');
-  if(!res.ok)return false;
-  const jwks=await res.json();
-  const jwk=jwks.keys?.find(k=>k.kid===header.kid&&k.kty==='RSA'&&(!k.alg||k.alg==='RS256'));
-  if(!jwk)return false;
-  const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
-  return await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,decode64(parts[2]),bytes(parts[0]+'.'+parts[1]));
- }catch{return false}
-}
 const roles=new Set(['educator','director','service_head','archivist','institution_admin']);
 const userName=s=>typeof s==='string'&&/^[a-zA-Z0-9_.-]{3,32}$/.test(s);
 const audit=(db,actor,action,target)=>db.prepare('INSERT INTO audit_events(institution_id,actor_id,target_id,action) VALUES(?,?,?,?)').bind(actor.institution_id,actor.id,target||null,action).run();
@@ -54,7 +31,8 @@ export default {async fetch(request,env){
   const demoUrl=new URL(request.url);demoUrl.pathname='/demo.html';
   return env.ASSETS.fetch(new Request(demoUrl,request));
  }
- if(!await verifyAccess(request,env))return json({error:'Cloudflare Access required'},403);
+ // User/password authentication is enforced by the D1-backed session endpoints.
+
  if(!path.startsWith('/api/')){
   if(method!=='GET'&&method!=='HEAD')return json({error:'method not allowed'},405);
   if(path!=='/najava'&&path!=='/dashboard')return json({error:'not found'},404);
