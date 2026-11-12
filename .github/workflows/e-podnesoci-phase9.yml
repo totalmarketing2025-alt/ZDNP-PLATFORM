@@ -1,0 +1,26 @@
+name: e-PODNESOCI phase 9 transaction checks
+on:
+  push:
+    branches: [feature/e-podnesoci]
+    paths:
+      - 'phase9-workflow/**'
+      - '.github/workflows/e-podnesoci-phase9.yml'
+  pull_request:
+    paths:
+      - 'phase9-workflow/**'
+      - '.github/workflows/e-podnesoci-phase9.yml'
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: phase9-workflow
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm test

@@ -1,0 +1,26 @@
+name: e-PODNESOCI phase 7 checks
+on:
+  push:
+    branches: [feature/e-podnesoci]
+    paths:
+      - 'phase7-portal/**'
+      - '.github/workflows/e-podnesoci-phase7.yml'
+  pull_request:
+    paths:
+      - 'phase7-portal/**'
+      - '.github/workflows/e-podnesoci-phase7.yml'
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+        working-directory: phase7-portal
+      - run: npm run check && npm test
+        working-directory: phase7-portal

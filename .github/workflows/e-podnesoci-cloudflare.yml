@@ -1,0 +1,26 @@
+name: e-PODNESOCI Cloudflare staging checks
+on:
+  push:
+    branches: [feature/e-podnesoci]
+    paths:
+      - 'cloudflare-e-podnesoci/**'
+      - '.github/workflows/e-podnesoci-cloudflare.yml'
+  pull_request:
+    paths:
+      - 'cloudflare-e-podnesoci/**'
+      - '.github/workflows/e-podnesoci-cloudflare.yml'
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: cloudflare-e-podnesoci
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm test

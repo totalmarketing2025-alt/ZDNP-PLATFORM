@@ -1,0 +1,10 @@
+{
+  "name": "zdnp-e-podnesoci-sandbox",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  }
+}
