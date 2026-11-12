@@ -1,0 +1,51 @@
+name: Deploy e-PODNESOCI Worker (manual, protected)
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type DEPLOY-STAGING to confirm isolated Worker deployment (no website routes)"
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: deploy-e-podnesoci-staging
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ inputs.confirm == 'DEPLOY-STAGING' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare-e-podnesoci
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ACCESS_TEAM_DOMAIN: ${{ vars.ACCESS_TEAM_DOMAIN }}
+      ACCESS_AUD: ${{ vars.ACCESS_AUD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate private Cloudflare configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID ACCESS_TEAM_DOMAIN ACCESS_AUD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required GitHub secret/variable: $name"
+              exit 1
+            fi
+          done
+          if [[ ! "$ACCESS_TEAM_DOMAIN" =~ ^https://[a-z0-9-]+\.cloudflareaccess\.com$ ]]; then
+            echo "::error::ACCESS_TEAM_DOMAIN must be the exact https://TEAM.cloudflareaccess.com issuer"
+            exit 1
+          fi
+      - name: Install dependencies and run tests
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm test
+      - name: Deploy isolated staging Worker (no route changes)
+        run: npx wrangler deploy --name zdnp-platform --var ENVIRONMENT:staging --var ACCESS_TEAM_DOMAIN:"$ACCESS_TEAM_DOMAIN" --var ACCESS_AUD:"$ACCESS_AUD"
