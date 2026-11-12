@@ -36,3 +36,17 @@ The current CI does not perform real Cloudflare Access or D1 end-to-end tests. G
 - CSRF protection, atomic login throttling / WAF rules, secure password-change UI and audit coverage.
 - Backups, retention, incident response, institutional approval and confidential-record security review.
 - Never use real prisoner, complaint or staff records in this staging prototype.
+
+## Same-domain portal routing (approved design; NOT deployed)
+The shared sign-in URL for NGAD and all institutional users is `https://www.zdnp.org/najava`. Authenticated UI uses `/dashboard`, and API uses `/api/*`. The existing website homepage and other Pages routes must remain untouched.
+
+**Do not use a catch-all `www.zdnp.org/*` Worker route.** In Cloudflare Workers > Worker > Settings > Domains & Routes, add **only** these three routes to the portal Worker after checking existing Pages/Workers route ownership:
+- `www.zdnp.org/najava`
+- `www.zdnp.org/dashboard`
+- `www.zdnp.org/api/*`
+
+These are route patterns, not three separate Workers. Route ownership and Cloudflare Pages compatibility must be verified in the actual account before enabling them. Never configure the root hostname as a Worker custom domain, which could intercept the whole site.
+
+The Worker currently requires verified Cloudflare Access JWT on all three paths; without an Access application and `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD`, all portal requests fail closed (403). To retain password-only login without Access would require a separate reviewed security design and explicit approval, not bypassing verification.
+
+No automated deployment is configured; merging to main does not publish these routes. Existing D1 and NGAD stay unchanged.
