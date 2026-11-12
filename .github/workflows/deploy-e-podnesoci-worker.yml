@@ -21,8 +21,6 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      ACCESS_TEAM_DOMAIN: ${{ vars.ACCESS_TEAM_DOMAIN }}
-      ACCESS_AUD: ${{ vars.ACCESS_AUD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,20 +30,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID ACCESS_TEAM_DOMAIN ACCESS_AUD; do
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
             if [ -z "${!name:-}" ]; then
               echo "::error::Missing required GitHub secret/variable: $name"
               exit 1
             fi
           done
-          if [[ ! "$ACCESS_TEAM_DOMAIN" =~ ^https://[a-z0-9-]+\.cloudflareaccess\.com$ ]]; then
-            echo "::error::ACCESS_TEAM_DOMAIN must be the exact https://TEAM.cloudflareaccess.com issuer"
-            exit 1
-          fi
       - name: Install dependencies and run tests
         run: |
           npm install --no-audit --no-fund
           npm run check
           npm test
       - name: Deploy isolated staging Worker (no route changes)
-        run: npx wrangler deploy --name zdnp-platform --var ENVIRONMENT:staging --var ACCESS_TEAM_DOMAIN:"$ACCESS_TEAM_DOMAIN" --var ACCESS_AUD:"$ACCESS_AUD"
+        run: npx wrangler deploy --name zdnp-platform --var ENVIRONMENT:staging
