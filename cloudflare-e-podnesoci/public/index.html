@@ -7,7 +7,7 @@
 <div class="card" id="usersCard"><h2>Корисници</h2><table><thead><tr><th>Корисник</th><th>Позиција</th><th>Статус</th><th>Управување</th></tr></thead><tbody id="users"></tbody></table></div>
 </section></main><script>
 const $=id=>document.getElementById(id);
-async function api(path,method='GET',data){const r=await fetch(path,{method,credentials:'same-origin',headers:{'content-type':'application/json'},body:data?JSON.stringify(data):undefined});const j=await r.json();if(!r.ok)throw Error(j.error||'Грешка');return j}
+async function api(path,method='GET',data){const r=await fetch(path,{method,credentials:'same-origin',headers:{'content-type':'application/json'},body:data?JSON.stringify(data):undefined});const j=await r.json();if(!r.ok){if(r.status===429)throw Error('Премногу обиди. Обидете се повторно за 5 минути.');if(r.status===401&&path==='/api/login')throw Error('Корисничкото име или лозинката не се прифатени.');throw Error(j.error||'Грешка')}return j}
 function msg(s){$('message').textContent=s}
 function cell(text){const td=document.createElement('td');td.textContent=String(text??'');return td}
 async function refresh(){
