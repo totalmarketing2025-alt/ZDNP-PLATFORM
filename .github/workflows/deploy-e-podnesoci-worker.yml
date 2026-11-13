@@ -1,5 +1,10 @@
-name: Deploy e-PODNESOCI Worker (manual, protected)
+name: Deploy e-PODNESOCI Worker (automatic on Worker changes)
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare-e-podnesoci/**'
+      - '.github/workflows/deploy-e-podnesoci-worker.yml'
   workflow_dispatch:
     inputs:
       confirm:
@@ -13,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
-    if: ${{ inputs.confirm == 'DEPLOY-STAGING' }}
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'DEPLOY-STAGING' }}
     runs-on: ubuntu-latest
     defaults:
       run:
