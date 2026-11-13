@@ -1,4 +1,4 @@
-// Cloudflare-only staging API. No hardcoded user/password or public bootstrap.
+// ZDNP authenticated API. No hardcoded user/password or public bootstrap.
 const json=(value,status=200,extra={})=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...extra}});
 const bytes=s=>new TextEncoder().encode(s);
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -63,11 +63,19 @@ export default {async fetch(request,env){
    const {username,password}=await parse(request);
    if(!userName(username)||typeof password!=='string')return json({error:'invalid credentials'},401);
    const user=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();
-   if(!user||!user.enabled)return json({error:'invalid credentials'},401);
-   if(user.locked_until&&new Date(user.locked_until.replace(' ','T')+'Z')>new Date())return json({error:'invalid credentials'},401);
+   if(!user||!user.enabled){
+    console.warn('auth.login.denied',{reason:!user?'unknown_user':'disabled_user'});
+    return json({error:'invalid credentials'},401);
+   }
+   // Short, automatic cooldown; no manual administrator unlock is needed.
+   if(user.locked_until&&new Date(user.locked_until.replace(' ','T')+'Z')>new Date()){
+    console.warn('auth.login.denied',{reason:'cooldown'});
+    return json({error:'too many attempts; try again in a few minutes'},429,{'retry-after':'300'});
+   }
    if(!await passwordVerify(password,user.password_hash)){
-    await env.DB.prepare(`UPDATE users SET failed_attempts=failed_attempts+1,
-     locked_until=CASE WHEN failed_attempts+1>=5 THEN datetime('now','+15 minutes') ELSE NULL END WHERE id=?`).bind(user.id).run();
+    console.warn('auth.login.denied',{reason:'password_mismatch'});
+    await env.DB.prepare(`UPDATE users SET failed_attempts=CASE WHEN locked_until IS NOT NULL AND locked_until<=datetime('now') THEN 1 ELSE failed_attempts+1 END,
+     locked_until=CASE WHEN (CASE WHEN locked_until IS NOT NULL AND locked_until<=datetime('now') THEN 1 ELSE failed_attempts+1 END)>=10 THEN datetime('now','+5 minutes') ELSE NULL END WHERE id=?`).bind(user.id).run();
     return json({error:'invalid credentials'},401);
    }
    await env.DB.prepare('UPDATE users SET failed_attempts=0,locked_until=NULL WHERE id=?').bind(user.id).run();
