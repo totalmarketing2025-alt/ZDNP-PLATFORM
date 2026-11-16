@@ -143,7 +143,7 @@ export default {async fetch(request,env){
    await env.DB.prepare('DELETE FROM sessions WHERE token_hash=?').bind(await hash(actor.token)).run();
    return json({ok:true},200,{'set-cookie':'sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'});
   }
-  if(path==='/api/me'&&method==='GET')return json({id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institution_id,mustChangePassword:!!actor.must_change_password,centralAdmin:actor.global_admin===1});
+  if(path==='/api/me'&&method==='GET')return json({id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institution_id,mustChangePassword:!!actor.must_change_password,centralAdmin:actor.global_admin===1&&actor.username==='NGAD'});
   if(path==='/api/change-password'&&method==='POST'){
    const b=await parse(request);
    const saved=await env.DB.prepare('SELECT password_hash FROM users WHERE id=?').bind(actor.id).first();
@@ -200,8 +200,10 @@ export default {async fetch(request,env){
   if(match&&method==='POST'){
    const [,id,action]=match;
    if(id===actor.id)return json({error:'cannot modify self'},403);
-   const target=central?await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=?').bind(id).first():await env.DB.prepare('SELECT id,institution_id,global_admin FROM users WHERE id=? AND institution_id=?').bind(id,actor.institution_id).first();
-   if(!target||target.global_admin===1)return json({error:'forbidden'},403);
+   const target=central?await env.DB.prepare('SELECT * FROM users WHERE id=?').bind(id).first():await env.DB.prepare('SELECT * FROM users WHERE id=? AND institution_id=?').bind(id,actor.institution_id).first();
+   // Never allow delegated admins to modify NGAD, even on databases where
+   // the optional global_admin column has not yet been migrated.
+   if(!target||target.global_admin===1||target.username?.toUpperCase()==='NGAD')return json({error:'forbidden'},403);
    const statements=[];
    if(action==='reset-password'){
     const b=await parse(request);statements.push(env.DB.prepare('UPDATE users SET password_hash=?,must_change_password=1 WHERE id=? AND institution_id=?').bind(await passwordHash(b.password),id,target.institution_id));
