@@ -17,7 +17,9 @@ const audit=(db,actor,action,target)=>db.prepare('INSERT INTO audit_events(insti
 async function current(db,request){
  const token=(request.headers.get('cookie')||'').match(/(?:^|;\s*)sid=([a-f0-9]{64})(?:;|$)/)?.[1];
  if(!token)return null;
- const user=await db.prepare(`SELECT u.id,u.username,u.role,u.institution_id,u.enabled,u.must_change_password,u.global_admin
+ // Select the existing user row without assuming a later optional migration
+ // (global_admin) was applied to the deployed D1 database.
+ const user=await db.prepare(`SELECT u.*
  FROM sessions s JOIN users u ON u.id=s.user_id
  WHERE s.token_hash=? AND s.expires_at>datetime('now') AND u.enabled=1`).bind(await hash(token)).first();
  return user?{...user,token}:null;
@@ -98,19 +100,6 @@ export default {async fetch(request,env){
    const {username,password}=await parse(request);
    if(!userName(username)||typeof password!=='string')return json({error:'invalid credentials'},401);
    const user=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();
-   // Diagnostic metadata contains no password, hash, session, or personally identifying fields.
-   // A database mismatch can be detected from the deployed Worker logs without exposing credentials.
-   if(username==='NGAD'){
-    const expectedHash='pbkdf2-sha256:310000:0241400f1df4c9852bda8ec33f98ea765def09f2d7bc394aa4ba9e352af1ca02:6650858f08f2f9d9c84dd15c4ea7d88ada268e052ede011e20f1a39539167a46';
-    console.info('auth.ngad.diagnostic',{
-     userFound:!!user,
-     enabled:user?.enabled===1,
-     storedHashMatchesExpected:user?.password_hash===expectedHash,
-     mustChangePassword:user?.must_change_password===1,
-     hasLock:!!user?.locked_until,
-     environment:env.ENVIRONMENT||'unset'
-    });
-   }
    if(!user||!user.enabled){
     console.warn('auth.login.denied',{reason:!user?'unknown_user':'disabled_user'});
     return json({error:'invalid credentials'},401);
@@ -119,21 +108,6 @@ export default {async fetch(request,env){
    if(user.locked_until&&new Date(user.locked_until.replace(' ','T')+'Z')>new Date()){
     console.warn('auth.login.denied',{reason:'cooldown'});
     return json({error:'too many attempts; try again in a few minutes'},429,{'retry-after':'300'});
-   }
-   // Temporary NGAD diagnostics: boolean comparisons only, never log credentials or hashes.
-   // Compare exact input against the known temporary credential and independently
-   // derive its PBKDF2 value to distinguish input issues from verifier issues.
-   if(username==='NGAD'){
-    const diagnosticSalt='0241400f1df4c9852bda8ec33f98ea765def09f2d7bc394aa4ba9e352af1ca02';
-    const expectedDerived='6650858f08f2f9d9c84dd15c4ea7d88ada268e052ede011e20f1a39539167a46';
-    const expectedTemporary=['OEsndI63','zsc4VRHj','QeBgCrgu','Xt5bagb8'].join('');
-    const derived=await pbkdf(password,diagnosticSalt);
-    console.info('auth.ngad.password_diagnostic',{
-     inputMatchesTemporary:secureCompare(password,expectedTemporary),
-     derivedMatchesExpected:secureCompare(derived,expectedDerived),
-     verifierAccepts:await passwordVerify(password,user.password_hash),
-     inputLengthMatches:password.length===expectedTemporary.length
-    });
    }
    if(!await passwordVerify(password,user.password_hash)){
     console.warn('auth.login.denied',{reason:'password_mismatch'});
@@ -231,5 +205,5 @@ export default {async fetch(request,env){
    await env.DB.batch(statements);return json({ok:true});
   }
   return json({error:'not found'},404);
- }catch(e){return json({error:'request failed'},400)}
+ }catch(e){console.error('api.unhandled_error',{path,errorName:e?.name||'Error',errorMessage:String(e?.message||'unknown').slice(0,160)});return json({error:'request failed',stage:path},500)}
 }};
