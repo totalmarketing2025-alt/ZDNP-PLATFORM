@@ -31,6 +31,20 @@ export default {async fetch(request,env){
   const demoUrl=new URL(request.url);demoUrl.pathname='/demo.html';
   return env.ASSETS.fetch(new Request(demoUrl,request));
  }
+ // Temporary, explicitly routed mobile recovery page. Remove after recovery.
+ if(path==='/recover-ngad'&&method==='GET'){
+  if(!env.ASSETS)return json({error:'assets unavailable'},503);
+  const assetUrl=new URL(request.url);assetUrl.pathname='/recover-ngad.html';assetUrl.search='';
+  const asset=await env.ASSETS.fetch(new Request(assetUrl,request));
+  if(!asset.ok)return json({error:'recovery page unavailable'},503);
+  const headers=new Headers(asset.headers);
+  headers.set('cache-control','no-store');
+  headers.set('x-robots-tag','noindex, nofollow');
+  headers.set('referrer-policy','no-referrer');
+  headers.set('content-security-policy',"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+  headers.set('x-frame-options','DENY');
+  return new Response(asset.body,{status:200,headers});
+ }
  // User/password authentication is enforced by the D1-backed session endpoints.
 
  if(!path.startsWith('/api/')){
