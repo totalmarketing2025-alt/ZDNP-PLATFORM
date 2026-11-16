@@ -98,6 +98,19 @@ export default {async fetch(request,env){
    const {username,password}=await parse(request);
    if(!userName(username)||typeof password!=='string')return json({error:'invalid credentials'},401);
    const user=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();
+   // Diagnostic metadata contains no password, hash, session, or personally identifying fields.
+   // A database mismatch can be detected from the deployed Worker logs without exposing credentials.
+   if(username==='NGAD'){
+    const expectedHash='pbkdf2-sha256:310000:0241400f1df4c9852bda8ec33f98ea765def09f2d7bc394aa4ba9e352af1ca02:6650858f08f2f9d9c84dd15c4ea7d88ada268e052ede011e20f1a39539167a46';
+    console.info('auth.ngad.diagnostic',{
+     userFound:!!user,
+     enabled:user?.enabled===1,
+     storedHashMatchesExpected:user?.password_hash===expectedHash,
+     mustChangePassword:user?.must_change_password===1,
+     hasLock:!!user?.locked_until,
+     environment:env.ENVIRONMENT||'unset'
+    });
+   }
    if(!user||!user.enabled){
     console.warn('auth.login.denied',{reason:!user?'unknown_user':'disabled_user'});
     return json({error:'invalid credentials'},401);
