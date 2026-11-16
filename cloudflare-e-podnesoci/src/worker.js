@@ -146,14 +146,20 @@ export default {async fetch(request,env){
   if(path==='/api/me'&&method==='GET')return json({id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institution_id,mustChangePassword:!!actor.must_change_password,centralAdmin:actor.global_admin===1});
   if(path==='/api/change-password'&&method==='POST'){
    const b=await parse(request);
-   if(!await passwordVerify(b.oldPassword,(await env.DB.prepare('SELECT password_hash FROM users WHERE id=?').bind(actor.id).first()).password_hash))return json({error:'invalid credentials'},401);
+   const saved=await env.DB.prepare('SELECT password_hash FROM users WHERE id=?').bind(actor.id).first();
+   if(!saved||!await passwordVerify(b.oldPassword,saved.password_hash))return json({error:'invalid credentials'},401);
+   if(typeof b.newPassword!=='string'||b.newPassword===b.oldPassword)return json({error:'choose a different valid password'},400);
    const password_hash=await passwordHash(b.newPassword);
+   // Password update and session revocation must succeed together. Audit logging
+   // is best-effort and must never roll back a completed password change.
    await env.DB.batch([
-    env.DB.prepare('UPDATE users SET password_hash=?,must_change_password=0 WHERE id=?').bind(password_hash,actor.id),
-    env.DB.prepare('DELETE FROM sessions WHERE user_id=?').bind(actor.id),
-    env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(actor.institution_id,actor.id,'change-password')
+    env.DB.prepare('UPDATE users SET password_hash=?,must_change_password=0 WHERE id=? AND password_hash=?').bind(password_hash,actor.id,saved.password_hash),
+    env.DB.prepare('DELETE FROM sessions WHERE user_id=?').bind(actor.id)
    ]);
-   return json({ok:true,loginAgain:true});
+   try{
+    await env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(actor.institution_id,actor.id,'change-password').run();
+   }catch(e){console.error('auth.change_password.audit_write_failed',{errorName:e?.name||'Error'});}
+   return json({ok:true,loginAgain:true},200,{'set-cookie':'sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'});
   }
   if(actor.must_change_password)return json({error:'change password required'},403);
   if(path==='/api/cases'&&method==='GET'){
