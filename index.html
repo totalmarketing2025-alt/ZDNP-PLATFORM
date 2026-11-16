@@ -121,9 +121,9 @@
 .membership-map-panel{background:radial-gradient(circle at 35% 45%,#fff,#f1f7fc)}
 .membership-map-panel h3,.membership-summary h3{margin:0;color:var(--navy);font-size:1.1rem}
 .membership-map{width:100%;height:auto;display:block;max-height:390px;margin:15px auto 5px;overflow:visible}
-.membership-map .region-shape{cursor:pointer;stroke:#fff;stroke-width:3;transition:filter .18s,opacity .18s}
-.membership-map .region-shape:hover,.membership-map .region-shape:focus{filter:brightness(1.08);outline:none;stroke:#082d4b;stroke-width:4}
-.membership-map .region-shape[aria-pressed="true"]{stroke:#082d4b;stroke-width:5}
+.membership-map .region-shape{cursor:pointer;stroke:#fff;stroke-width:2.5;stroke-linejoin:round;transition:filter .18s,opacity .18s}
+.membership-map .region-shape:hover,.membership-map .region-shape:focus-visible{filter:brightness(1.12);outline:none;stroke:#082d4b;stroke-width:3.5}
+.membership-map .region-shape[aria-pressed="true"]{stroke:#082d4b;stroke-width:4}
 .membership-map text{font:750 16px system-ui,sans-serif;fill:#fff;pointer-events:none;paint-order:stroke;stroke:rgba(8,45,75,.55);stroke-width:3px}
 .membership-map .map-count{font-size:21px}
 .membership-map-note{font-size:.8rem;color:var(--muted);margin:8px 0 0}
@@ -258,18 +258,17 @@ nav a:focus-visible,.language-switch button:focus-visible,.menu-toggle:focus-vis
 <div class="section-head"><div class="section-kicker" data-i18n="200">Членство на платформата</div><h2 id="membership-title" data-i18n="201">Нашето членство низ Македонија</h2><p data-i18n="202">Нашата граѓанска платформа обединува членови од сите делови на Македонија. Погледнете ја распределбата во четири географски региони.</p></div>
 <div class="membership-layout">
 <div class="membership-map-panel"><h3 data-i18n="203">Регионална распределба</h3>
-<svg class="membership-map" viewBox="0 0 620 390" role="group" aria-label="Интерактивна шематска карта на Македонија поделена на четири региони" data-membership-map>
-<defs><clipPath id="membership-country"><path d="M466.8,20.0 L583.5,96.0 L600.0,252.7 L555.6,260.5 L517.3,301.8 L391.0,297.2 L302.2,349.0 L149.8,370.0 L53.1,312.3 L20.0,210.7 L49.6,130.1 L79.2,132.1 L89.7,83.6 L227.3,46.9 L358.8,23.9 L466.8,20.0 Z"/></clipPath></defs>
-<g clip-path="url(#membership-country)">
-<rect class="region-shape" data-region="north" role="button" tabindex="0" aria-pressed="false" aria-label="Северен регион, 471 членови" x="0" y="0" width="620" height="175" fill="#246d9d"/>
-<rect class="region-shape" data-region="west" role="button" tabindex="0" aria-pressed="false" aria-label="Западен регион, 302 членови" x="0" y="175" width="310" height="215" fill="#7561a8"/>
-<rect class="region-shape" data-region="east" role="button" tabindex="0" aria-pressed="false" aria-label="Источен регион, 204 членови" x="310" y="175" width="310" height="215" fill="#178c80"/>
-<rect class="region-shape" data-region="south" role="button" tabindex="0" aria-pressed="false" aria-label="Јужен регион, 271 членови" x="230" y="275" width="300" height="115" fill="#c38b2b"/>
+<svg class="membership-map" viewBox="0 0 630 390" role="group" aria-label="Интерактивна географска карта на Македонија со четири организациски региони" data-membership-map>
+<g class="membership-map-geography">
+<path class="region-shape" data-region="north" role="button" tabindex="0" aria-pressed="false" aria-label="Северен регион, 471 членови" d="M375.5,186.1 L242.7,179.3 L164.9,69.3 L235.1,50.7 L285.5,42.0 L362.1,28.8 L454.3,25.4 L375.5,186.1 Z" fill="#246d9d"><title>Северен регион — 471 членови на платформата</title></path>
+<path class="region-shape" data-region="east" role="button" tabindex="0" aria-pressed="false" aria-label="Источен регион, 204 членови" d="M375.5,186.1 L454.3,25.4 L466.3,25.0 L579.0,97.8 L595.0,247.7 L552.1,255.2 L515.1,294.8 L442.1,292.1 L375.5,186.1 Z" fill="#178c80"><title>Источен регион — 204 членови на платформата</title></path>
+<path class="region-shape" data-region="west" role="button" tabindex="0" aria-pressed="false" aria-label="Западен регион, 302 членови" d="M242.7,179.3 L161.9,359.8 L160.3,360.0 L66.9,304.8 L35.0,207.6 L63.6,130.4 L92.2,132.3 L102.3,85.9 L164.9,69.3 L242.7,179.3 Z" fill="#7561a8"><title>Западен регион — 302 членови на платформата</title></path>
+<path class="region-shape" data-region="south" role="button" tabindex="0" aria-pressed="false" aria-label="Јужен регион, 271 членови" d="M242.7,179.3 L375.5,186.1 L442.1,292.1 L393.2,290.4 L307.4,339.9 L161.9,359.8 L242.7,179.3 Z" fill="#c38b2b"><title>Јужен регион — 271 членови на платформата</title></path>
+<path d="M466.3,25.0 L579.0,97.8 L595.0,247.7 L552.1,255.2 L515.1,294.8 L393.2,290.4 L307.4,339.9 L160.3,360.0 L66.9,304.8 L35.0,207.6 L63.6,130.4 L92.2,132.3 L102.3,85.9 L235.1,50.7 L285.5,42.0 L362.1,28.8 L466.3,25.0 Z" fill="none" stroke="#0d4268" stroke-width="2.8" pointer-events="none"/>
 </g>
-<path d="M466.8,20.0 L583.5,96.0 L600.0,252.7 L555.6,260.5 L517.3,301.8 L391.0,297.2 L302.2,349.0 L149.8,370.0 L53.1,312.3 L20.0,210.7 L49.6,130.1 L79.2,132.1 L89.7,83.6 L227.3,46.9 L358.8,23.9 L466.8,20.0 Z" fill="none" stroke="#0d4268" stroke-width="3" pointer-events="none"/>
-<g aria-hidden="true"><text x="335" y="100" text-anchor="middle" data-membership-map-label="north">Северен</text><text x="335" y="125" text-anchor="middle" class="map-count">471</text><text x="164" y="250" text-anchor="middle" data-membership-map-label="west">Западен</text><text x="164" y="275" text-anchor="middle" class="map-count">302</text><text x="453" y="222" text-anchor="middle" data-membership-map-label="east">Источен</text><text x="453" y="247" text-anchor="middle" class="map-count">204</text><text x="354" y="323" text-anchor="middle" data-membership-map-label="south">Јужен</text><text x="354" y="346" text-anchor="middle" class="map-count">271</text></g>
+<g aria-hidden="true"><text x="310" y="105" text-anchor="middle" data-membership-map-label="north">Северен</text><text x="310" y="129" text-anchor="middle" class="map-count">471</text><text x="493" y="173" text-anchor="middle" data-membership-map-label="east">Источен</text><text x="493" y="197" text-anchor="middle" class="map-count">204</text><text x="139" y="227" text-anchor="middle" data-membership-map-label="west">Западен</text><text x="139" y="251" text-anchor="middle" class="map-count">302</text><text x="313" y="272" text-anchor="middle" data-membership-map-label="south">Јужен</text><text x="313" y="296" text-anchor="middle" class="map-count">271</text></g>
 </svg>
-<p class="membership-map-note" data-i18n="204">Шематски приказ на четири организациски региони; границите не претставуваат официјална административна поделба. Скопје е вклучено во Северниот регион.</p>
+<p class="membership-map-note" data-i18n="204">Надворешната контура е заснована на географски податоци Natural Earth. Четирите обоени зони се илустративна организациска поделба, а не граници на општини. Скопје припаѓа во Северниот регион.</p>
 <p class="membership-live" id="membership-live" role="status" aria-live="polite"></p></div>
 <div class="membership-summary"><h3 data-i18n="205">Членови на граѓанската платформа</h3><div class="membership-total" aria-label="1248 членови">1.248</div><p class="membership-total-label" data-i18n="206">Вкупно членови на платформата</p>
 <div class="membership-region-list">
@@ -440,7 +439,7 @@ i18nTexts["200"]=["Членство на платформата","Anëtarësia e
 i18nTexts["201"]=["Нашето членство низ Македонија","Anëtarësia jonë në Maqedoni"];
 i18nTexts["202"]=["Нашата граѓанска платформа обединува членови од сите делови на Македонија. Погледнете ја распределбата во четири географски региони.","Platforma jonë qytetare bashkon anëtarë nga të gjitha pjesët e Maqedonisë. Shihni shpërndarjen në katër rajone gjeografike."];
 i18nTexts["203"]=["Регионална распределба","Shpërndarja rajonale"];
-i18nTexts["204"]=["Шематски приказ на четири организациски региони; границите не претставуваат официјална административна поделба. Скопје е вклучено во Северниот регион.","Paraqitje skematike e katër rajoneve organizative; kufijtë nuk përfaqësojnë ndarje zyrtare administrative. Shkupi përfshihet në rajonin verior."];
+i18nTexts["204"]=["Шематски приказ на четири организациски региони; границите не претставуваат официјална административна поделба. Скопје е вклучено во Северниот регион.","Konturi i jashtëm bazohet në të dhënat gjeografike Natural Earth. Katër zonat me ngjyra janë ndarje ilustruese organizative, jo kufij komunalë. Shkupi përfshihet në rajonin verior."];
 i18nTexts["205"]=["Членови на граѓанската платформа","Anëtarët e platformës qytetare"];
 i18nTexts["206"]=["Вкупно членови на платформата","Gjithsej anëtarë të platformës"];
 i18nTexts["207"]=["Северен регион (со Скопје)","Rajoni verior (me Shkupin)"];
