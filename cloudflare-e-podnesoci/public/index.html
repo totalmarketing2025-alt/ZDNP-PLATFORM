@@ -12,7 +12,7 @@ async function api(path,method='GET',data){const r=await fetch(path,{method,cred
 function msg(s){$('message').textContent=s}
 function cell(text){const td=document.createElement('td');td.textContent=String(text??'');return td}
 async function refresh(){
- const me=await api('/api/me');if(me.mustChangePassword){const oldPassword=prompt('Стара лозинка');const newPassword=prompt('Нова лозинка (12+ знаци)');if(oldPassword&&newPassword){await api('/api/change-password','POST',{oldPassword,newPassword});msg('Лозинката е сменета. Најавете се повторно.')}return;}$('login').hidden=true;$('panel').hidden=false;document.getElementById('institutionId').hidden=!me.centralAdmin;if(location.pathname!=='/dashboard')history.replaceState(null,'','/dashboard');$('who').textContent=me.username+' · '+me.role;
+ const me=await api('/api/me');if(me.mustChangePassword){const oldPassword=prompt('Стара лозинка');if(oldPassword===null)return;const newPassword=prompt('Нова лозинка (12+ знаци)');if(newPassword===null)return;if(!oldPassword||!newPassword){msg('Внесете стара и нова лозинка.');return}await api('/api/change-password','POST',{oldPassword,newPassword});msg('Лозинката е сменета. Најавете се повторно.');$('login').hidden=false;$('panel').hidden=true;return;}$('login').hidden=true;$('panel').hidden=false;document.getElementById('institutionId').hidden=!me.centralAdmin;if(location.pathname!=='/dashboard')history.replaceState(null,'','/dashboard');$('who').textContent=me.username+' · '+me.role;
  if(me.role!=='institution_admin'){
   $('analyticsCard').hidden=true;$('createCard').hidden=true;$('usersCard').hidden=true;
   $('caseCard').hidden=false;
@@ -48,7 +48,22 @@ if(recoveryMode){
   finally{button.disabled=false}
  };
 }
-$('loginForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await api('/api/login','POST',Object.fromEntries(f));e.target.reset();await refresh();msg('Успешна најава')}catch(err){msg(err.message)}};
+$('loginForm').onsubmit=async e=>{
+ e.preventDefault();
+ const form=e.target,button=form.querySelector('button'),f=new FormData(form);
+ button.disabled=true;
+ try{
+  await api('/api/login','POST',Object.fromEntries(f));
+  form.reset();
+ }catch(err){msg('Најавата не успеа: '+err.message);button.disabled=false;return}
+ try{
+  await refresh();
+  if(!$('panel').hidden)msg('Успешна најава');
+ }catch(err){
+  msg('Лозинката е прифатена, но панелот не се вчита: '+err.message+'. Обновете ја страницата.');
+ }
+ finally{button.disabled=false}
+};
 $('addForm').onsubmit=async e=>{e.preventDefault();try{await api('/api/users','POST',Object.fromEntries(new FormData(e.target)));e.target.reset();await refresh();msg('Корисникот е додаден')}catch(err){msg(err.message)}};
 $('logout').onclick=async()=>{await api('/api/logout','POST');location.assign('/najava')};
 if(!recoveryMode)refresh().catch(()=>{$('login').hidden=false;$('panel').hidden=true;if(location.pathname!=='/najava')history.replaceState(null,'','/najava')});
