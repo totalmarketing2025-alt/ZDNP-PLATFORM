@@ -141,12 +141,26 @@ export default {async fetch(request,env){
      locked_until=CASE WHEN (CASE WHEN locked_until IS NOT NULL AND locked_until<=datetime('now') THEN 1 ELSE failed_attempts+1 END)>=10 THEN datetime('now','+5 minutes') ELSE NULL END WHERE id=?`).bind(user.id).run();
     return json({error:'invalid credentials'},401);
    }
-   await env.DB.prepare('UPDATE users SET failed_attempts=0,locked_until=NULL WHERE id=?').bind(user.id).run();
+   // Keep authentication working if optional audit logging fails. A session
+   // must be persisted before issuing its cookie.
    const token=random(),tokenHash=await hash(token);
-   await env.DB.batch([
-    env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','+8 hours'))").bind(tokenHash,user.id),
-    env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(user.institution_id,user.id,'login')
-   ]);
+   try{
+    await env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','+8 hours'))").bind(tokenHash,user.id).run();
+   }catch(e){
+    console.error('auth.login.session_write_failed',{errorName:e?.name||'Error',errorMessage:String(e?.message||'unknown').slice(0,180)});
+    return json({error:'session unavailable'},503);
+   }
+   try{
+    await env.DB.prepare('UPDATE users SET failed_attempts=0,locked_until=NULL WHERE id=?').bind(user.id).run();
+   }catch(e){
+    console.error('auth.login.counter_reset_failed',{errorName:e?.name||'Error'});
+   }
+   try{
+    await env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(user.institution_id,user.id,'login').run();
+   }catch(e){
+    console.error('auth.login.audit_write_failed',{errorName:e?.name||'Error',errorMessage:String(e?.message||'unknown').slice(0,180)});
+   }
+   console.info('auth.login.session_created',{username:'NGAD'===username?'NGAD':'other'});
    return json({ok:true,mustChangePassword:!!user.must_change_password},200,{'set-cookie':`sid=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`});
   }
   const actor=await current(env.DB,request);
