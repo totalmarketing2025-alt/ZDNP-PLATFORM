@@ -1,5 +1,6 @@
 <!doctype html><html lang="mk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZDNP · e-ПОДНЕСОЦИ</title><style>
 :root{font-family:system-ui,sans-serif;color:#e9eef8;background:#0b1220}*{box-sizing:border-box}body{margin:0}header{padding:20px 5%;background:#16243b;display:flex;justify-content:space-between;align-items:center}main{max-width:1100px;margin:32px auto;padding:0 18px}.card{background:#18273e;border:1px solid #304461;border-radius:14px;padding:22px;margin:18px 0}input,select,button{font:inherit;border-radius:7px;padding:10px;margin:6px 4px 6px 0}input,select{background:#0e1b2c;color:#fff;border:1px solid #567}button{background:#39b5a1;border:0;color:#071b1c;cursor:pointer}button.danger{background:#ec7f87}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #35455e}small{color:#a9b9cb}.row{display:flex;flex-wrap:wrap;gap:10px}.metric{flex:1;min-width:150px;background:#0e1b2c;border-radius:8px;padding:15px}#message{min-height:28px;color:#ffcf78}section[hidden]{display:none}a{color:#8dd} @media(max-width:650px){table{font-size:12px}td button{padding:6px}}</style></head><body><header><strong>ZDNP e-ПОДНЕСОЦИ</strong><span id="who"></span></header><main><p><strong>Тест систем.</strong> Не внесувајте вистински службени или затворски податоци. Пристапот е ограничен на овластени тест-корисници.</p><div id="message" role="status"></div>
+<section id="recoveryCard" class="card" hidden><h1>Ресетирање на NGAD</h1><p>Привремена постапка за администраторот.</p><form id="recoveryForm" autocomplete="off"><label>Recovery Token<br><input name="token" type="password" required minlength="48" autocomplete="off"></label><br><label>Нова лозинка<br><input name="newPassword" type="password" required minlength="16" maxlength="256" autocomplete="new-password"></label><br><label>Потврди лозинка<br><input name="confirmPassword" type="password" required minlength="16" maxlength="256" autocomplete="new-password"></label><br><button type="submit">Ресетирај NGAD</button></form><p><a href="/najava">Назад кон најава</a></p></section>
 <section id="login" class="card"><h1>Најава</h1><form id="loginForm"><input name="username" placeholder="Корисничко име" autocomplete="username" required><input name="password" type="password" placeholder="Лозинка" autocomplete="current-password" required><button>Најави се</button></form></section>
 <section id="panel" hidden><div class="row"><h1>Администрација</h1><button id="logout">Одјави се</button></div>
 <div class="card" id="caseCard" hidden><h2>Достапни предмети</h2><div id="cases"></div></div><div class="card" id="analyticsCard"><h2>Аналитика на активности</h2><div id="metrics" class="row"></div><h3>Последни активности</h3><table><thead><tr><th>Време</th><th>Корисник</th><th>Акција</th></tr></thead><tbody id="activity"></tbody></table></div>
@@ -30,8 +31,25 @@ async function refresh(){
  recent.slice(-20).reverse().forEach(e=>{const tr=document.createElement('tr');tr.append(cell(e.at),cell(names.get(e.actorId)||'—'),cell(e.action));$('activity').append(tr)});
  $('users').replaceChildren();users.forEach(u=>{const tr=document.createElement('tr');tr.append(cell(u.username),cell(u.role),cell(u.enabled?'Активен':'Деактивиран'));const td=document.createElement('td');if(u.id!==me.id){for(const [label,action] of [['Ресетирај лозинка','reset-password'],['Деактивирај','disable'],['Избриши','delete']]){const b=document.createElement('button');b.textContent=label;if(action!=='reset-password')b.className='danger';b.onclick=async()=>{let data;if(action==='reset-password'){const password=prompt('Нова лозинка (најмалку 12 знаци):');if(password===null)return;data={password}}else if(!confirm('Потврди: '+label+' '+u.username))return;try{await api('/api/users/'+u.id+'/'+action,'POST',data);msg('Промената е зачувана');await refresh()}catch(e){msg(e.message)}};td.append(b)}}tr.append(td);$('users').append(tr)});
 }
+const recoveryMode=new URLSearchParams(location.search).get('recover')==='1';
+if(recoveryMode){
+ $('login').hidden=true;$('panel').hidden=true;$('recoveryCard').hidden=false;
+ $('recoveryForm').onsubmit=async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target),token=String(f.get('token')||''),newPassword=String(f.get('newPassword')||''),confirm=String(f.get('confirmPassword')||'');
+  if(newPassword!==confirm){msg('Лозинките не се совпаѓаат.');return}
+  const button=e.target.querySelector('button');button.disabled=true;
+  try{
+   const response=await fetch('/api/admin/recover-ngad',{method:'POST',headers:{'content-type':'application/json','x-recovery-token':token},body:JSON.stringify({newPassword}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'});
+   const result=await response.json();
+   if(response.ok&&result.ok){e.target.reset();e.target.hidden=true;msg('Успешно ресетирање. Отворете /najava и најавете се со новата лозинка.')}
+   else msg('Ресетирањето не успеа (HTTP '+response.status+'). Проверете го токенот или дали веќе е искористен.');
+  }catch{msg('Мрежна грешка. Обидете се повторно.')}
+  finally{button.disabled=false}
+ };
+}
 $('loginForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await api('/api/login','POST',Object.fromEntries(f));e.target.reset();await refresh();msg('Успешна најава')}catch(err){msg(err.message)}};
 $('addForm').onsubmit=async e=>{e.preventDefault();try{await api('/api/users','POST',Object.fromEntries(new FormData(e.target)));e.target.reset();await refresh();msg('Корисникот е додаден')}catch(err){msg(err.message)}};
 $('logout').onclick=async()=>{await api('/api/logout','POST');location.assign('/najava')};
-refresh().catch(()=>{$('login').hidden=false;$('panel').hidden=true;if(location.pathname!=='/najava')history.replaceState(null,'','/najava')});
+if(!recoveryMode)refresh().catch(()=>{$('login').hidden=false;$('panel').hidden=true;if(location.pathname!=='/najava')history.replaceState(null,'','/najava')});
 </script></body></html>
