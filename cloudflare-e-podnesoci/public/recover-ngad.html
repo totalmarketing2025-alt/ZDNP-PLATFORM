@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="mk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>ZDNP · Привремено ресетирање</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#e9eef8;background:#0b1220;color-scheme:dark}*{box-sizing:border-box}body{margin:0;padding:18px}main{max-width:460px;margin:5vh auto;background:#18273e;border:1px solid #304461;border-radius:14px;padding:24px}h1{font-size:1.4rem}label{display:block;margin-top:16px}input{width:100%;font:inherit;margin-top:7px;padding:12px;border-radius:8px;border:1px solid #789;background:#0e1b2c;color:#fff}button{width:100%;margin-top:20px;padding:13px;font:inherit;border:0;border-radius:8px;background:#39b5a1;color:#071b1c;font-weight:bold}button:disabled{opacity:.55}#status{min-height:2em;margin-top:15px;white-space:pre-wrap}small{color:#b8c6d9}a{color:#9ee}</style></head>
+<body><main><h1>Ресетирање на NGAD</h1><p>Привремена администраторска постапка. Користете ја само на официјалниот домен zdnp.org.</p>
+<form id="recovery" autocomplete="off">
+<label>Recovery Token<input id="token" type="password" required minlength="48" autocomplete="off" spellcheck="false"></label>
+<label>Нова лозинка<input id="password" type="password" required minlength="16" maxlength="256" autocomplete="new-password"></label>
+<label>Потврди нова лозинка<input id="confirm" type="password" required minlength="16" maxlength="256" autocomplete="new-password"></label>
+<button id="submit" type="submit">Ресетирај NGAD</button></form>
+<p id="status" role="status" aria-live="polite"></p>
+<small>Не испраќајте токен или лозинка во разговор. По успешно ресетирање привремената страница ќе биде отстранета.</small>
+<p><a href="/najava">Назад кон најава</a></p></main>
+<script>
+const form=document.getElementById('recovery'),status=document.getElementById('status'),button=document.getElementById('submit');
+form.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const token=document.getElementById('token').value;
+ const password=document.getElementById('password').value;
+ const confirm=document.getElementById('confirm').value;
+ if(password!==confirm){status.textContent='Лозинките не се совпаѓаат.';return}
+ if(token.length<48||password.length<16){status.textContent='Проверете ја должината на токенот и лозинката.';return}
+ button.disabled=true;status.textContent='Се обработува...';
+ try{
+  const r=await fetch('/api/admin/recover-ngad',{method:'POST',headers:{'content-type':'application/json','x-recovery-token':token},body:JSON.stringify({newPassword:password}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'});
+  const result=await r.json();
+  if(r.ok&&result.ok){status.textContent='Успешно ресетирање. Отворете /najava и најавете се со новата лозинка. Потоа сменете ја повторно кога системот ќе побара.';form.reset();form.hidden=true}
+  else status.textContent='Ресетирањето не успеа. HTTP '+r.status+'. Проверете го токенот и дали постапката е веќе извршена.';
+ }catch{status.textContent='Грешка во мрежата. Обидете се повторно.'}
+ finally{button.disabled=false}
+});
+</script></body></html>
