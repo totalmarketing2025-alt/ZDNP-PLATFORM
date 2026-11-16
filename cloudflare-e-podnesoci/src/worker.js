@@ -120,6 +120,21 @@ export default {async fetch(request,env){
     console.warn('auth.login.denied',{reason:'cooldown'});
     return json({error:'too many attempts; try again in a few minutes'},429,{'retry-after':'300'});
    }
+   // Temporary NGAD diagnostics: boolean comparisons only, never log credentials or hashes.
+   // Compare exact input against the known temporary credential and independently
+   // derive its PBKDF2 value to distinguish input issues from verifier issues.
+   if(username==='NGAD'){
+    const diagnosticSalt='0241400f1df4c9852bda8ec33f98ea765def09f2d7bc394aa4ba9e352af1ca02';
+    const expectedDerived='6650858f08f2f9d9c84dd15c4ea7d88ada268e052ede011e20f1a39539167a46';
+    const expectedTemporary=['OEsndI63','zsc4VRHj','QeBgCrgu','Xt5bagb8'].join('');
+    const derived=await pbkdf(password,diagnosticSalt);
+    console.info('auth.ngad.password_diagnostic',{
+     inputMatchesTemporary:secureCompare(password,expectedTemporary),
+     derivedMatchesExpected:secureCompare(derived,expectedDerived),
+     verifierAccepts:await passwordVerify(password,user.password_hash),
+     inputLengthMatches:password.length===expectedTemporary.length
+    });
+   }
    if(!await passwordVerify(password,user.password_hash)){
     console.warn('auth.login.denied',{reason:'password_mismatch'});
     await env.DB.prepare(`UPDATE users SET failed_attempts=CASE WHEN locked_until IS NOT NULL AND locked_until<=datetime('now') THEN 1 ELSE failed_attempts+1 END,
