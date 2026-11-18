@@ -7,6 +7,13 @@ test('staff case access remains scoped to institution and nonconfidential cases'
 test('central admin cannot create additional NGAD or modify another central account',()=>{assert.match(worker,/b.username.toUpperCase\(\)==='NGAD'/);assert.match(worker,/target.global_admin===1/);});
 test('no deployment enabled by default',()=>{const config=readFileSync(new URL('./wrangler.toml',import.meta.url),'utf8');assert.match(config,/workers_dev = false/)});
 
-test('local account operations bind actor institution, not uninitialized target',()=>assert.match(worker,/SELECT id,institution_id,global_admin FROM users WHERE id=\? AND institution_id=\?'\)\.bind\(id,actor\.institution_id\)/));
+test('local account operations bind actor institution, not uninitialized target',()=>assert.match(worker,/SELECT \* FROM users WHERE id=\? AND institution_id=\?'\)\.bind\(id,actor\.institution_id\)/));
 test('cross-institution disable uses target institution',()=>assert.match(worker,/UPDATE users SET enabled=0 WHERE id=\? AND institution_id=\?'\)\.bind\(id,target\.institution_id\)/));
-test('Cloudflare Access requires cryptographically verified JWT and fails closed',()=>{assert.match(worker,/if\(!await verifyAccess\(request,env\)\)return json/);assert.match(worker,/crypto\.subtle\.verify\('RSASSA-PKCS1-v1_5'/);});
+// The current public portal is protected by application credentials, not by
+// Cloudflare Access. The temporary recovery path must never become open login.
+test('temporary test path requires secret, deadline and NGAD central identity',()=>{
+ assert.match(worker,/if\(!ngadTestWindow\(env\)\)return json/);
+ assert.match(worker,/secureCompare\(await hash\(provided\),await hash\(env\.NGAD_TEST_LOGIN_TOKEN\)\)/);
+ assert.match(worker,/WHERE username='NGAD' AND enabled=1 AND role='institution_admin' AND global_admin=1/);
+ assert.match(worker,/ngad-test-consumed:/);
+});
