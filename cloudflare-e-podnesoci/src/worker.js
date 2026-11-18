@@ -9,20 +9,39 @@ const pbkdf=async(password,salt,iterations=310000)=>{
  return hex(await crypto.subtle.deriveBits({name:'PBKDF2',salt:bytes(salt),iterations,hash:'SHA-256'},k,256));
 };
 const secureCompare=(a,b)=>{if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
+// An NGAD test token must be explicitly configured as a secret, be valid for
+// at most four hours, and can create only one 30-minute session.
+const ngadTestWindow=env=>{
+ const until=Date.parse(env.NGAD_TEST_LOGIN_UNTIL||'');
+ const remaining=until-Date.now();
+ return typeof env.NGAD_TEST_LOGIN_TOKEN==='string'&&env.NGAD_TEST_LOGIN_TOKEN.length>=48&&
+  Number.isFinite(until)&&remaining>0&&remaining<=4*60*60*1000;
+};
+async function ngadTestSignature(secret,token){
+ const key=await crypto.subtle.importKey('raw',bytes(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+ return hex(await crypto.subtle.sign('HMAC',key,bytes(token)));
+}
+const cookie=(name,value,maxAge)=>`${name}=${value}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${maxAge}`;
 export async function passwordHash(password){if(typeof password!=='string'||password.length<12||password.length>256)throw Error('password policy');const salt=random();return 'pbkdf2-sha256:310000:'+salt+':'+await pbkdf(password,salt)}
 async function passwordVerify(password,stored){try{const [algo,count,salt,value]=stored.split(':');if(algo!=='pbkdf2-sha256'||Number(count)!==310000||!password||password.length>256)return false;return secureCompare(value,await pbkdf(password,salt))}catch{return false}}
 const roles=new Set(['educator','director','service_head','archivist','institution_admin']);
 const userName=s=>typeof s==='string'&&/^[a-zA-Z0-9_.-]{3,32}$/.test(s);
 const audit=(db,actor,action,target)=>db.prepare('INSERT INTO audit_events(institution_id,actor_id,target_id,action) VALUES(?,?,?,?)').bind(actor.institution_id,actor.id,target||null,action).run();
-async function current(db,request){
- const token=(request.headers.get('cookie')||'').match(/(?:^|;\s*)sid=([a-f0-9]{64})(?:;|$)/)?.[1];
+async function current(db,request,env){
+ const rawCookies=request.headers.get('cookie')||'';
+ const token=rawCookies.match(/(?:^|;\s*)sid=([a-f0-9]{64})(?:;|$)/)?.[1];
  if(!token)return null;
  // Select the existing user row without assuming a later optional migration
  // (global_admin) was applied to the deployed D1 database.
  const user=await db.prepare(`SELECT u.*
  FROM sessions s JOIN users u ON u.id=s.user_id
  WHERE s.token_hash=? AND s.expires_at>datetime('now') AND u.enabled=1`).bind(await hash(token)).first();
- return user?{...user,token}:null;
+ if(!user)return null;
+ const signed=rawCookies.match(/(?:^|;\s*)ngad_test=([a-f0-9]{64})(?:;|$)/)?.[1];
+ const testAccess=!!(signed&&user.username==='NGAD'&&user.role==='institution_admin'&&
+  user.global_admin===1&&ngadTestWindow(env)&&
+  secureCompare(signed,await ngadTestSignature(env.NGAD_TEST_LOGIN_TOKEN,token)));
+ return {...user,token,testAccess};
 }
 async function parse(request){const raw=await request.text();if(raw.length>12000)throw Error('payload too large');return JSON.parse(raw||'{}')}
 export default {async fetch(request,env){
@@ -75,6 +94,39 @@ export default {async fetch(request,env){
   if(!type.includes('application/json'))return json({error:'JSON required'},415);
  }
  try{
+  // A single-use passwordless test session for the existing NGAD account.
+  // Requires a separate high-entropy Worker secret and short expiry. No other
+  // username can use this endpoint and no password or hash is changed in D1.
+  if(path==='/api/admin/test-login-ngad'&&method==='POST'){
+   if(!ngadTestWindow(env))return json({error:'test access unavailable'},404);
+   const {token:provided}=await parse(request);
+   if(typeof provided!=='string'||provided.length<48||
+      !secureCompare(await hash(provided),await hash(env.NGAD_TEST_LOGIN_TOKEN)))
+    return json({error:'test access unavailable'},404);
+   const admin=await env.DB.prepare("SELECT * FROM users WHERE username='NGAD' AND enabled=1 AND role='institution_admin' AND global_admin=1").first();
+   if(!admin)return json({error:'NGAD test access unavailable'},409);
+   const token=random(),tokenHash=await hash(token);
+   // Atomic insert: an expired marker consumes the token only if a usable
+   // session was created. The marker's primary key rejects all replays.
+   const usedMarker=await hash('ngad-test-consumed:'+env.NGAD_TEST_LOGIN_TOKEN);
+   try{
+    await env.DB.batch([
+     env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','-1 second'))").bind(usedMarker,admin.id),
+     env.DB.prepare("INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,datetime('now','+30 minutes'))").bind(tokenHash,admin.id)
+    ]);
+   }catch(e){
+    console.warn('auth.ngad.test_login_denied',{reason:'already_used_or_session_unavailable',errorName:e?.name||'Error'});
+    return json({error:'test token already used or session unavailable'},409);
+   }
+   try{
+    await env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(admin.institution_id,admin.id,'ngad-test-login').run();
+   }catch(e){console.error('auth.ngad.test_login_audit_failed',{errorName:e?.name||'Error'});}
+   console.info('auth.ngad.test_session_created');
+   const response=json({ok:true,username:'NGAD',expiresInSeconds:1800});
+   response.headers.append('set-cookie',cookie('sid',token,1800));
+   response.headers.append('set-cookie',cookie('ngad_test',await ngadTestSignature(env.NGAD_TEST_LOGIN_TOKEN,token),1800));
+   return response;
+  }
   // Temporary recovery: disabled unless a high-entropy Cloudflare secret is configured.
   // Remove this route and the secret immediately after the administrator recovers access.
   if(path==='/api/admin/recover-ngad'&&method==='POST'){
@@ -137,13 +189,16 @@ export default {async fetch(request,env){
    console.info('auth.login.session_created',{username:'NGAD'===username?'NGAD':'other'});
    return json({ok:true,mustChangePassword:!!user.must_change_password},200,{'set-cookie':`sid=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`});
   }
-  const actor=await current(env.DB,request);
+  const actor=await current(env.DB,request,env);
   if(!actor)return json({error:'unauthorized'},401);
   if(path==='/api/logout'&&method==='POST'){
    await env.DB.prepare('DELETE FROM sessions WHERE token_hash=?').bind(await hash(actor.token)).run();
-   return json({ok:true},200,{'set-cookie':'sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'});
+   const response=json({ok:true});
+   response.headers.append('set-cookie',cookie('sid','',0));
+   response.headers.append('set-cookie',cookie('ngad_test','',0));
+   return response;
   }
-  if(path==='/api/me'&&method==='GET')return json({id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institution_id,mustChangePassword:!!actor.must_change_password,centralAdmin:actor.global_admin===1&&actor.username==='NGAD'});
+  if(path==='/api/me'&&method==='GET')return json({id:actor.id,username:actor.username,role:actor.role,institutionId:actor.institution_id,mustChangePassword:!!actor.must_change_password&&!actor.testAccess,centralAdmin:actor.global_admin===1&&actor.username==='NGAD',temporaryTestAccess:actor.testAccess});
   if(path==='/api/change-password'&&method==='POST'){
    const b=await parse(request);
    const saved=await env.DB.prepare('SELECT password_hash FROM users WHERE id=?').bind(actor.id).first();
@@ -159,9 +214,12 @@ export default {async fetch(request,env){
    try{
     await env.DB.prepare('INSERT INTO audit_events(institution_id,actor_id,action) VALUES(?,?,?)').bind(actor.institution_id,actor.id,'change-password').run();
    }catch(e){console.error('auth.change_password.audit_write_failed',{errorName:e?.name||'Error'});}
-   return json({ok:true,loginAgain:true},200,{'set-cookie':'sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'});
+   const response=json({ok:true,loginAgain:true});
+   response.headers.append('set-cookie',cookie('sid','',0));
+   response.headers.append('set-cookie',cookie('ngad_test','',0));
+   return response;
   }
-  if(actor.must_change_password)return json({error:'change password required'},403);
+  if(actor.must_change_password&&!actor.testAccess)return json({error:'change password required'},403);
   if(path==='/api/cases'&&method==='GET'){
    if(!['educator','director'].includes(actor.role))return json({error:'forbidden'},403);
    const rows=await env.DB.prepare(`SELECT id,case_number,category,status,created_at FROM cases
