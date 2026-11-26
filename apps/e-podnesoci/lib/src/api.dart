@@ -123,7 +123,7 @@ class PortalApi {
       request.write(jsonEncode(body));
     }
     if (useSession && _sessionId != null) {
-      request.headers.set(HttpHeaders.cookieHeader, 'sid=' + _sessionId!);
+      request.headers.set(HttpHeaders.cookieHeader, 'sid=$_sessionId');
     }
 
     final response = await request.close().timeout(const Duration(seconds: 25));
