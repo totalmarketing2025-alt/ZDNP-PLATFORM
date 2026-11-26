@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'src/api.dart';
 
@@ -404,7 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Colors.white),
                     ),
                     title: Text(
-                      'Добредојде, ' + username,
+                      'Добредојде, $username',
                       style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w700),
                     ),
@@ -667,8 +667,8 @@ class _TestBanner extends StatelessWidget {
   const _TestBanner();
 
   @override
-  Widget build(BuildContext context) => Card(
-        color: const Color(0xFFFFF3D8),
+  Widget build(BuildContext context) => const Card(
+        color: Color(0xFFFFF3D8),
         child: const Padding(
           padding: EdgeInsets.all(14),
           child: Row(
