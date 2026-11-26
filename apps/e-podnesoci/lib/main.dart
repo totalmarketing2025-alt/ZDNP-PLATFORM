@@ -409,8 +409,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                     subtitle: Text(
-                      _roleLabel(_role) +
-                          (institution.isEmpty ? '' : ' · ' + institution),
+                      '${_roleLabel(_role)}${institution.isEmpty ? '' : ' · $institution'}',
                       style: const TextStyle(color: Color(0xFFD3DEE8)),
                     ),
                   ),
@@ -482,10 +481,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     : Icons.person_off_outlined),
                                 title: Text(name.isEmpty ? handle : name),
                                 subtitle: Text(
-                                  handle +
-                                      ' · ' +
-                                      _roleLabel(
-                                          user['role']?.toString() ?? ''),
+                                  '$handle · ${_roleLabel(user['role']?.toString() ?? '')}',
                                 ),
                                 trailing: Text(
                                     enabled ? 'Активен' : 'Неактивен'),
@@ -521,9 +517,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 title: Text(item['case_number']?.toString() ??
                                     'Предмет'),
                                 subtitle: Text(
-                                  (item['category']?.toString() ?? '—') +
-                                      ' · ' +
-                                      (item['status']?.toString() ?? '—'),
+                                  '${item['category']?.toString() ?? '—'} · ${item['status']?.toString() ?? '—'}',
                                 ),
                               );
                             }),
@@ -633,9 +627,7 @@ class _ActivityCard extends StatelessWidget {
                     leading: const Icon(Icons.history, size: 20),
                     title: Text(event['action']?.toString() ?? 'Активност'),
                     subtitle: Text(
-                      (event['at']?.toString() ?? '') +
-                          ' · корисник ' +
-                          (event['actorId']?.toString() ?? '—'),
+                      '${event['at']?.toString() ?? ''} · корисник ${event['actorId']?.toString() ?? '—'}',
                     ),
                   );
                 }),
