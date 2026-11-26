@@ -28,7 +28,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - name: Build release APK
-        run: flutter build apk --release --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
+        run: flutter build apk --release --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
       - uses: actions/upload-artifact@v4
         with:
           name: zdnp-e-podnesoci-android
@@ -51,7 +51,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - name: Build Windows release
-        run: flutter build windows --release --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
+        run: flutter build windows --release --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
       - uses: actions/upload-artifact@v4
         with:
           name: zdnp-e-podnesoci-windows

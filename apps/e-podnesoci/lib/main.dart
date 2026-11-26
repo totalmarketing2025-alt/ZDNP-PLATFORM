@@ -259,6 +259,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _load();
+    if (widget.user['mustChangePassword'] == true) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _changePassword(required: true));
+    }
+  }
+
+  Future<void> _changePassword({required bool required}) async {
+    final oldPassword = TextEditingController();
+    final newPassword = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final changed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: !required,
+      builder: (context) => AlertDialog(
+        title: Text(required ? 'Постави нова лозинка' : 'Промени лозинка'),
+        content: Form(
+          key: formKey,
+          child: SizedBox(
+            width: 380,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: oldPassword,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Стара лозинка',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Внеси ја старата лозинка.'
+                      : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: newPassword,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Нова лозинка (12+ знаци)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) => value == null || value.length < 12
+                      ? 'Лозинката мора да има најмалку 12 знаци.'
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          if (!required)
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Откажи'),
+            ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              try {
+                await widget.api.changePassword(
+                  oldPassword: oldPassword.text,
+                  newPassword: newPassword.text,
+                );
+                if (context.mounted) Navigator.pop(context, true);
+              } on ApiException catch (error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(error.message)),
+                  );
+                }
+              }
+            },
+            child: const Text('Зачувај'),
+          ),
+        ],
+      ),
+    );
+    oldPassword.dispose();
+    newPassword.dispose();
+    if (changed == true && mounted) await widget.onSignOut();
   }
 
   Future<void> _load() async {
@@ -292,6 +372,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: const Text('ZDNP · e-ПОДНЕСОЦИ'),
         actions: [
+          IconButton(
+            tooltip: 'Промени лозинка',
+            onPressed: () => _changePassword(required: false),
+            icon: const Icon(Icons.password_outlined),
+          ),
           IconButton(
             tooltip: 'Одјави се',
             onPressed: widget.onSignOut,

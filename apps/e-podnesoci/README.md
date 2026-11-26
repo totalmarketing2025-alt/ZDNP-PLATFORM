@@ -19,13 +19,13 @@ Install Flutter with Android and Windows desktop support. From this directory, g
 ```sh
 flutter create --project-name zdnp_e_podnesoci --platforms=android,windows .
 flutter pub get
-flutter run -d windows --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
+flutter run -d windows --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
 ```
 
 For Android, select a connected device or emulator:
 
 ```sh
-flutter run --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
+flutter run --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
 ```
 
 The API base URL can be overridden with `ZDNP_API_BASE_URL`. Do not point the app at production until the Worker, authentication, privacy, and institutional approval work is complete. The current Cloudflare Worker is documented as a staging/test system.
@@ -33,8 +33,8 @@ The API base URL can be overridden with `ZDNP_API_BASE_URL`. Do not point the ap
 ## Build
 
 ```sh
-flutter build apk --release --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
-flutter build windows --release --dart-define=ZDNP_API_BASE_URL=https://zdnp.org
+flutter build apk --release --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
+flutter build windows --release --dart-define=ZDNP_API_BASE_URL=https://www.zdnp.org
 ```
 
 The app uses the Worker's existing `sid` session cookie. Its value is stored in Android secure storage or Windows protected storage and sent only over HTTPS to the configured API origin. The user's password is never stored.

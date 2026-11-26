@@ -17,7 +17,7 @@ class PortalApi {
   PortalApi({
     String baseUrl = const String.fromEnvironment(
       'ZDNP_API_BASE_URL',
-      defaultValue: 'https://zdnp.org',
+      defaultValue: 'https://www.zdnp.org',
     ),
     FlutterSecureStorage? secureStorage,
   })  : _baseUri = Uri.parse(baseUrl),
@@ -83,9 +83,23 @@ class PortalApi {
   ) async =>
       (await _send(path, method: 'POST', body: body)).body;
 
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await post('/api/change-password', {
+      'oldPassword': oldPassword,
+      'newPassword': newPassword,
+    });
+    _sessionId = null;
+    await _secureStorage.delete(key: _sessionKey);
+  }
+
   Future<void> logout() async {
     try {
       await _send('/api/logout', method: 'POST');
+    } on ApiException {
+      // The server may already have revoked the session.
     } finally {
       _sessionId = null;
       await _secureStorage.delete(key: _sessionKey);
