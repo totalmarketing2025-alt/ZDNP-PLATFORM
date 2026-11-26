@@ -10,7 +10,7 @@ The initial client foundation connects to the existing staff API:
 - educator/director case list;
 - administrator user list and activity summary.
 
-The public intake form is intentionally not wired yet. The website keeps its submit button disabled, and the current Worker has no public case-submission or status-tracking endpoint. Do not collect real personal data until those backend routes and the production security review are complete.
+The native app currently covers staff sign-in and dashboards. The website has staging endpoints for request/petition submission and status lookup; the app does not yet include the public form. Complaints and corruption/irregularity reports remain disabled until a confidential reviewer and independent routing path are defined. Do not enter real personal or correctional data in staging.
 
 ## Local setup
 

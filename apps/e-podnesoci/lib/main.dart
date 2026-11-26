@@ -542,7 +542,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const _InfoCard(
                   title: 'Јавни поднесоци',
                   body:
-                      'Поднесување и следење барања ќе се активираат откако backend API-то ќе биде подготвено.',
+                      'Јавниот формулар за барања и молби е достапен на веб-страницата; во оваа верзија апликацијата е за службените корисници.',
                   icon: Icons.note_add_outlined,
                 ),
               ],
