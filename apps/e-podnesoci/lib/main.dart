@@ -661,7 +661,7 @@ class _TestBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Card(
         color: Color(0xFFFFF3D8),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
