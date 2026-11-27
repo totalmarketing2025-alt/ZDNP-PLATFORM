@@ -83,6 +83,19 @@ class PortalApi {
   ) async =>
       (await _send(path, method: 'POST', body: body)).body;
 
+  Future<void> recoverNgad({
+    required String recoveryToken,
+    required String newPassword,
+  }) async {
+    await _send(
+      '/api/admin/recover-ngad',
+      method: 'POST',
+      body: {'newPassword': newPassword},
+      useSession: false,
+      extraHeaders: {'x-recovery-token': recoveryToken},
+    );
+  }
+
   Future<void> changePassword({
     required String oldPassword,
     required String newPassword,
@@ -111,6 +124,7 @@ class PortalApi {
     String method = 'GET',
     Map<String, Object?>? body,
     bool useSession = true,
+    Map<String, String> extraHeaders = const {},
   }) async {
     final uri = _baseUri.resolve(path);
     if (uri.scheme != 'https' && uri.host != 'localhost') {
@@ -118,6 +132,9 @@ class PortalApi {
     }
     final request = await _client.openUrl(method, uri);
     request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+    for (final entry in extraHeaders.entries) {
+      request.headers.set(entry.key, entry.value);
+    }
     if (body != null) {
       request.headers.contentType = ContentType.json;
       request.write(jsonEncode(body));
