@@ -82,7 +82,13 @@ class _EPodnesociAppState extends State<EPodnesociApp> {
       home: _loading
           ? const _LoadingScreen()
           : _user == null
-              ? LoginScreen(onSignIn: _signIn)
+              ? LoginScreen(
+                  onSignIn: _signIn,
+                  onRecover: (token, password) => _api.recoverNgad(
+                    recoveryToken: token,
+                    newPassword: password,
+                  ),
+                )
               : DashboardScreen(
                   api: _api,
                   user: _user!,
@@ -93,9 +99,14 @@ class _EPodnesociAppState extends State<EPodnesociApp> {
 }
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({required this.onSignIn, super.key});
+  const LoginScreen({
+    required this.onSignIn,
+    required this.onRecover,
+    super.key,
+  });
 
   final Future<void> Function(String, String) onSignIn;
+  final Future<void> Function(String, String) onRecover;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -103,10 +114,117 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _username = TextEditingController();
+  final _username = TextEditingController(text: 'NGAD');
   final _password = TextEditingController();
   bool _busy = false;
   String? _error;
+
+  Future<void> _recoverPassword() async {
+    final token = TextEditingController();
+    final newPassword = TextEditingController();
+    final confirmation = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final recovered = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Постави лозинка за NGAD'),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: 380,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Внеси го recovery-клучот NGAD_RECOVERY_TOKEN од Cloudflare и избери нова лозинка. Ова не ги брише поднесоците.',
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: token,
+                    obscureText: true,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
+                      labelText: 'Recovery-клуч',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => value == null || value.length < 48
+                        ? 'Recovery-клучот не е целосен.'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: newPassword,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Нова лозинка (најмалку 16 знаци)',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => value == null || value.length < 16
+                        ? 'Лозинката мора да има најмалку 16 знаци.'
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: confirmation,
+                    obscureText: true,
+                    onFieldSubmitted: (_) {},
+                    decoration: const InputDecoration(
+                      labelText: 'Повтори ја лозинката',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => value != newPassword.text
+                        ? 'Лозинките не се совпаѓаат.'
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Откажи'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              try {
+                await widget.onRecover(token.text.trim(), newPassword.text);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext, true);
+                }
+              } on ApiException catch (error) {
+                if (dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text(error.message)),
+                  );
+                }
+              } catch (_) {
+                if (dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Не можам да се поврзам со системот.'),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Постави лозинка'),
+          ),
+        ],
+      ),
+    );
+    token.dispose();
+    newPassword.dispose();
+    confirmation.dispose();
+    if (recovered == true && mounted) {
+      _password.clear();
+      setState(() => _error =
+          'Лозинката е поставена. Најави се со NGAD и новата лозинка.');
+    }
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -210,6 +328,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   )
                                 : const Icon(Icons.login),
                             label: Text(_busy ? 'Се најавувам…' : 'Најави се'),
+                          ),
+                          TextButton.icon(
+                            onPressed: _busy ? null : _recoverPassword,
+                            icon: const Icon(Icons.key_outlined),
+                            label: const Text('Прва најава / постави лозинка'),
                           ),
                         ],
                       ),
