@@ -7,11 +7,27 @@
 <div class="card" id="caseCard" hidden><h2>Достапни предмети</h2><div id="cases"></div></div><div class="card" id="analyticsCard"><h2>Аналитика на активности</h2><div id="metrics" class="row"></div><h3>Последни активности</h3><table><thead><tr><th>Време</th><th>Корисник</th><th>Акција</th></tr></thead><tbody id="activity"></tbody></table></div>
 <div class="card" id="createCard"><h2>Нов корисник</h2><form id="addForm"><input name="username" placeholder="Корисничко име" required minlength="3"><input name="displayName" placeholder="Име и презиме" required><select name="institutionId" id="institutionId"><option value="IDR">КПУ Идризово</option><option value="PRI">КПУ Прилеп</option><option value="STI">КПУ Штип</option></select><select name="role"><option value="educator">Воспитувач</option><option value="director">Директор</option><option value="service_head">Раководител</option><option value="archivist">Архивар</option><option value="institution_admin">Администратор</option></select><input name="password" type="password" minlength="12" placeholder="Привремена лозинка (12+)" required><button>Додади корисник</button></form></div>
 <div class="card" id="usersCard"><h2>Корисници</h2><table><thead><tr><th>Корисник</th><th>Позиција</th><th>Статус</th><th>Управување</th></tr></thead><tbody id="users"></tbody></table></div>
-</section></main><script>
+</section></main><dialog id="caseDialog" class="card" style="max-width:720px;width:calc(100% - 32px);color:#e9eef8;background:#18273e;border:1px solid #304461"><h2>Детали на поднесок</h2><div id="caseDetail"></div><form method="dialog"><button>Затвори</button></form></dialog><script>
 const $=id=>document.getElementById(id);
 async function api(path,method='GET',data){const r=await fetch(path,{method,credentials:'same-origin',headers:{'content-type':'application/json'},body:data?JSON.stringify(data):undefined});const j=await r.json();if(!r.ok){if(r.status===429)throw Error('Премногу обиди. Обидете се повторно за 5 минути.');if(r.status===401&&path==='/api/login')throw Error('Корисничкото име или лозинката не се прифатени.');throw Error(j.error||'Грешка')}return j}
 function msg(s){$('message').textContent=s}
 function cell(text){const td=document.createElement('td');td.textContent=String(text??'');return td}
+async function openCase(item){
+ const result=await api('/api/cases/'+encodeURIComponent(item.id));
+ const root=$('caseDetail');root.replaceChildren();
+ const fields=[
+  ['Број',result.case.caseNumber],['Категорија',result.case.category],
+  ['Статус',result.case.status],['Име и презиме',result.submission.fullName],
+  ['Регистарски број',result.submission.registryNumber],['Третман',result.submission.treatment],
+  ['Е-пошта',result.submission.email],['Предмет',result.submission.subject],
+  ['Содржина',result.submission.message]
+ ];
+ for(const [label,value] of fields){
+  const block=document.createElement('p'),strong=document.createElement('strong');
+  strong.textContent=label+': ';block.append(strong,document.createTextNode(String(value??'—')));root.append(block);
+ }
+ $('caseDialog').showModal();
+}
 async function refresh(){
  const me=await api('/api/me');if(me.mustChangePassword){const oldPassword=prompt('Стара лозинка');if(oldPassword===null)return;const newPassword=prompt('Нова лозинка (12+ знаци)');if(newPassword===null)return;if(!oldPassword||!newPassword){msg('Внесете стара и нова лозинка.');return}await api('/api/change-password','POST',{oldPassword,newPassword});msg('Лозинката е сменета. Најавете се повторно.');$('login').hidden=false;$('panel').hidden=true;return;}$('login').hidden=true;$('ngadTest').hidden=true;$('panel').hidden=false;document.getElementById('institutionId').hidden=!me.centralAdmin;if(location.pathname!=='/dashboard')history.replaceState(null,'','/dashboard');$('who').textContent=me.username+' · '+me.role+(me.temporaryTestAccess?' · тест (30 минути)':'');
  if(me.role!=='institution_admin'){
@@ -21,7 +37,13 @@ async function refresh(){
    const {cases}=await api('/api/cases');
    $('cases').replaceChildren();
    if(!cases.length)$('cases').textContent='Нема достапни предмети.';
-   for(const item of cases){const p=document.createElement('p');p.textContent=[item.case_number,item.category,item.status].join(' · ');$('cases').append(p)}
+   for(const item of cases){
+    const row=document.createElement('div');row.className='row';row.style.alignItems='center';row.style.justifyContent='space-between';
+    const p=document.createElement('p');p.textContent=[item.case_number,item.category,item.status].join(' · ');
+    const b=document.createElement('button');b.type='button';b.textContent='Отвори';
+    b.onclick=async()=>{try{await openCase(item)}catch(err){msg(err.message)}};
+    row.append(p,b);$('cases').append(row);
+   }
   }else $('cases').textContent='За оваа улога сè уште нема активен модул.';
   return;
  }

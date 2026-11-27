@@ -384,17 +384,19 @@ nav a:focus-visible,.language-switch button:focus-visible,.menu-toggle:focus-vis
 </div>
 </section>
 <section id="e-podnesoci" style="background:#f0f5f9;padding:70px 0"><div class="container">
-<div class="section-head"><span class="section-kicker" data-i18n="121">Е-ПОДНЕСОЦИ</span><h2 data-i18n="122">Поднесете барање или пријава</h2><p data-i18n="123">Формуларот е во тест-подготовка. Не внесувајте вистински лични или доверливи податоци сè до официјалното активирање.</p></div>
+<div class="section-head"><span class="section-kicker" data-i18n="121">Е-ПОДНЕСОЦИ</span><h2 data-i18n="122">Поднесете барање или пријава</h2><p data-i18n="149">Тест-приемот е за тест-поднесоци. Не внесувајте вистински лични или затворски податоци.</p></div>
 <div class="card" style="max-width:850px;margin:auto;transform:none"><form id="publicSubmissionForm" style="display:grid;gap:14px">
-<label><span data-i18n="124">Вид на поднесок</span><select name="kind" required><option value="request" data-i18n="135">Барање</option><option value="petition" data-i18n="136">Молба</option><option value="complaint" data-i18n="137">Претставка</option><option value="report" data-i18n="138">Пријави корупција / неправилност</option></select></label>
+<label><span data-i18n="124">Вид на поднесок</span><select name="kind" required><option value="request" data-i18n="135">Барање</option><option value="petition" data-i18n="136">Молба</option><option value="complaint" data-i18n="137" disabled>Претставка</option><option value="report" data-i18n="138" disabled>Пријави корупција / неправилност</option></select></label>
 <label><span data-i18n="125">Казнено-поправна установа</span><select name="institution" required><option value="IDR">КПУ Идризово</option><option value="PRI">КПУ Прилеп</option><option value="STI">КПУ Штип</option></select></label>
 <div id="publicIdentityFields" style="display:grid;gap:14px"><label><span data-i18n="126">Име и презиме на осуденото лице</span><input name="fullName" maxlength="120" autocomplete="off"></label><label><span data-i18n="127">Регистарски број</span><input name="registryNumber" maxlength="40" autocomplete="off"></label><label><span data-i18n="128">Третман</span><select name="treatment"><option value="closed" data-i18n="139">Затворен</option><option value="semi-open" data-i18n="140">Полуотворен</option><option value="open" data-i18n="141">Отворен</option></select></label></div>
 <label><span data-i18n="129">Предмет</span><input name="subject" maxlength="180" required></label><label><span data-i18n="130">Содржина на поднесокот</span><textarea name="body" rows="7" maxlength="6000" required></textarea></label>
-<label><span data-i18n="131">Е-пошта за повратен одговор (незадолжителна за анонимна пријава)</span><input name="email" type="email" maxlength="254"></label>
+<label><span data-i18n="152">Е-пошта за контакт (задолжителна за барање или молба)</span><input name="email" type="email" maxlength="254"></label>
 <p id="publicAnonymousNotice" hidden data-i18n="132">Анонимна пријава: не внесувајте податоци што ве идентификуваат. Пријави против раководството не треба автоматски да се проследуваат до него.</p>
-<p style="font-size:.9rem;color:#607285" data-i18n="133">Испраќањето ќе биде овозможено по безбедносни проверки, одобренија за институционално доставување и поставување на заштитен API.</p>
-<button type="button" disabled style="opacity:.55;cursor:not-allowed" data-i18n="134">Испрати — наскоро</button><p id="publicSubmissionStatus" role="status" aria-live="polite"></p>
-</form></div></div></section>
+<p style="font-size:.9rem;color:#607285" data-i18n="150">Во тест-верзијата се примаат барања и молби. Претставките и пријавите ќе се вклучат по поставување независен доверлив тек за нив.</p>
+<div style="position:absolute;left:-10000px" aria-hidden="true"><label>Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+<button type="submit" data-i18n="151">Поднеси</button><p id="publicSubmissionStatus" role="status" aria-live="polite"></p>
+</form></div>
+<div class="card" style="max-width:850px;margin:16px auto;transform:none"><h3 data-i18n="144">Провери статус на поднесок</h3><p data-i18n="145">Внеси го бројот и еднократниот код што ги доби по поднесувањето.</p><form id="publicStatusForm" style="display:grid;gap:14px"><label><span data-i18n="146">Број на поднесок</span><input name="caseNumber" required maxlength="42" autocomplete="off"></label><label><span data-i18n="147">Еднократен код за следење</span><input name="trackingToken" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></label><button type="submit" data-i18n="148">Провери</button><p id="publicStatusResult" role="status" aria-live="polite"></p></form></div></div></section>
 </main>
 <footer><div class="container footer-row"><div><div class="footer-brand"><span data-i18n="110">НОВ ПОЧЕТОК · СКОПЈЕ</span></div><small>© <span id="year"></span><span data-i18n="111">Независна граѓанска платформа „Нов почеток“ – Скопје. Сите права се задржани.</span></small></div><a href="https://www.facebook.com/share/1K4GPP2dSV/" target="_blank" rel="noopener noreferrer" aria-label="Facebook – Нов почеток" style="display:inline-flex;align-items:center;gap:6px;color:#1877F2;font-weight:700">ⓕ Facebook</a> <a class="backtop" href="#pocetna"><span data-i18n="112">Назад на врв ↑</span></a></div></footer>
 <script>
@@ -415,6 +417,15 @@ const i18nTexts = {"0": ["Независна граѓанска платформ
 Object.assign(i18nTexts,{
 "142":["е-ПОДНЕСОЦИ","PARASHTRESA ELEKTRONIKE"],
 "143":["Најава","Hyrje"],
+"144":["Провери статус на поднесок","Kontrollo statusin e parashtresës"],
+"145":["Внеси го бројот и еднократниот код што ги доби по поднесувањето.","Shkruaj numrin dhe kodin njëpërdorimësh që more pas dorëzimit."],
+"146":["Број на поднесок","Numri i parashtresës"],
+"147":["Еднократен код за следење","Kodi njëpërdorimësh i gjurmimit"],
+"148":["Провери","Kontrollo"],
+"149":["Тест-приемот е за тест-поднесоци. Не внесувајте вистински лични или затворски податоци.","Pranimi testues është vetëm për parashtresa testuese. Mos vendosni të dhëna reale personale apo të burgosurve."],
+"150":["Во тест-верзијата се примаат барања и молби. Кодот за следење се прикажува еднаш; автоматска е-пошта не се испраќа. Претставките и пријавите чекаат посебен доверлив тек.","Në versionin testues pranohen kërkesa dhe lutje. Kodi i gjurmimit shfaqet vetëm një herë; nuk dërgohet email automatik. Ankesat dhe raportimet presin rrjedhë të veçantë konfidenciale."],
+"151":["Поднеси","Dërgo"],
+"152":["Е-пошта за контакт (задолжителна за барање или молба)","Emaili për kontakt (i detyrueshëm për kërkesë ose lutje)"],
 "135":["Барање","Kërkesë"],"136":["Молба","Lutje"],"137":["Претставка","Ankesë"],"138":["Пријави корупција / неправилност","Raporto korrupsion / parregullsi"],"139":["Затворен","I mbyllur"],"140":["Полуотворен","Gjysmë i hapur"],"141":["Отворен","I hapur"],
 "121":["Е-ПОДНЕСОЦИ","PARASHTRESA ELEKTRONIKE"],
 "122":["Поднесете барање или пријава","Paraqisni kërkesë ose raportim"],
@@ -492,7 +503,70 @@ setLanguage(preferred);
 
 
 <style>#publicIdentityFields[hidden],#publicAnonymousNotice[hidden]{display:none!important}#publicSubmissionForm label{display:grid;gap:6px;font-weight:700;color:#082d4b}#publicSubmissionForm input,#publicSubmissionForm select,#publicSubmissionForm textarea{width:100%;font:inherit;border:1px solid #cbd8e4;border-radius:10px;padding:12px;background:#fff;color:#203347}#publicSubmissionForm button{padding:13px;border:0;border-radius:10px;background:#082d4b;color:white;font-weight:700}</style>
-<script>(function(){const f=document.getElementById('publicSubmissionForm');const kind=f.elements.kind;function sync(){const anonymous=kind.value==='report';document.getElementById('publicIdentityFields').hidden=anonymous;document.getElementById('publicAnonymousNotice').hidden=!anonymous;f.elements.fullName.required=!anonymous;f.elements.registryNumber.required=!anonymous;f.elements.email.required=!anonymous;}kind.addEventListener('change',sync);sync();})();</script>
+<script>(function(){
+ const f=document.getElementById('publicSubmissionForm');
+ const kind=f.elements.kind,submitStatus=document.getElementById('publicSubmissionStatus');
+ function sync(){
+  const anonymous=kind.value==='report';
+  document.getElementById('publicIdentityFields').hidden=anonymous;
+  document.getElementById('publicAnonymousNotice').hidden=!anonymous;
+  f.elements.fullName.required=!anonymous;
+  f.elements.registryNumber.required=!anonymous;
+  f.elements.email.required=!anonymous;
+ }
+ kind.addEventListener('change',sync);sync();
+ f.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=f.querySelector('button[type="submit"]');
+  button.disabled=true;submitStatus.textContent=window.currentLang==='sq'?'Duke dërguar…':'Се испраќа…';
+  try{
+   const response=await fetch('/api/public/submissions',{
+    method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
+    body:JSON.stringify(Object.fromEntries(new FormData(f).entries()))
+   });
+   const result=await response.json();
+   if(!response.ok){
+    if(response.status===409)throw Error(window.currentLang==='sq'?'Ky lloj kërkon rrugë të veçantë konfidenciale dhe ende nuk pranohet.':'Овој вид бара посебен доверлив тек и засега не се прима.');
+    if(response.status===429)throw Error(window.currentLang==='sq'?'U arrit kufiri i dërgimeve. Provo përsëri më vonë.':'Достигнат е лимитот за поднесување. Обиди се подоцна.');
+    if(response.status===400)throw Error(window.currentLang==='sq'?'Kontrollo fushat e detyrueshme.':'Провери ги задолжителните полиња.');
+    if(response.status===503)throw Error(window.currentLang==='sq'?'Shërbimi testues nuk është konfiguruar ende.':'Тест-сервисот сè уште не е конфигуриран.');
+    throw Error(window.currentLang==='sq'?'Dërgimi nuk u krye. Provo përsëri më vonë.':'Поднесувањето не успеа. Обиди се повторно подоцна.');
+   }
+   f.reset();sync();
+   const mk='Поднесокот е примен. Број: '+result.caseNumber+'. Код за проверка: '+result.trackingToken+'. Зачувај ги — кодот се прикажува само еднаш.';
+   const sq='Parashtresa u pranua. Numri: '+result.caseNumber+'. Kodi i kontrollit: '+result.trackingToken+'. Ruaji — kodi shfaqet vetëm një herë.';
+   submitStatus.textContent=window.currentLang==='sq'?sq:mk;
+  }catch(error){submitStatus.textContent=error.message||'Грешка при поднесувањето.'}
+  finally{button.disabled=false}
+ });
+})();
+(function(){
+ const f=document.getElementById('publicStatusForm'),resultEl=document.getElementById('publicStatusResult');
+ f.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=f.querySelector('button[type="submit"]');button.disabled=true;
+  resultEl.textContent=window.currentLang==='sq'?'Duke kontrolluar…':'Се проверува…';
+  try{
+   const response=await fetch('/api/public/status',{
+    method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},
+    body:JSON.stringify(Object.fromEntries(new FormData(f).entries()))
+   });
+   const result=await response.json();
+   if(!response.ok)throw Error(window.currentLang==='sq'?'Numri ose kodi nuk u gjet.':'Бројот или кодот не е пронајден.');
+   const statusNames={
+    received:window.currentLang==='sq'?'Pranuar':'Примено',
+    triage:window.currentLang==='sq'?'Në shqyrtim':'Во преглед',
+    assigned:window.currentLang==='sq'?'Caktuar':'Доделено',
+    forwarded:window.currentLang==='sq'?'Përcjellë':'Препратено',
+    needs_info:window.currentLang==='sq'?'Kërkohen të dhëna':'Потребни се податоци',
+    answered:window.currentLang==='sq'?'Përgjigjur':'Одговорено',
+    closed:window.currentLang==='sq'?'Mbyllur':'Затворено'
+   };
+   resultEl.textContent=(window.currentLang==='sq'?'Statusi: ':'Статус: ')+(statusNames[result.status]||result.status);
+  }catch(error){resultEl.textContent=error.message||'Грешка при проверката.'}
+  finally{button.disabled=false}
+ });
+})();</script>
 
 <script id="zdnp-membership-interaction">
 (function(){

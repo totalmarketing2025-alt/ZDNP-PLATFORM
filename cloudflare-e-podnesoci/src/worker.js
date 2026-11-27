@@ -44,6 +44,42 @@ async function current(db,request,env){
  return {...user,token,testAccess};
 }
 async function parse(request){const raw=await request.text();if(raw.length>12000)throw Error('payload too large');return JSON.parse(raw||'{}')}
+const b64=value=>btoa(String.fromCharCode(...new Uint8Array(value)));
+const unb64=value=>Uint8Array.from(atob(value),ch=>ch.charCodeAt(0));
+async function submissionKey(secret){
+ if(typeof secret!=='string'||secret.length<48)throw Error('submission encryption key is not configured');
+ const raw=await crypto.subtle.digest('SHA-256',bytes(secret));
+ return crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['encrypt','decrypt']);
+}
+async function encryptSubmission(payload,caseId,secret){
+ const key=await submissionKey(secret),iv=crypto.getRandomValues(new Uint8Array(12));
+ const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:bytes(caseId)},key,bytes(JSON.stringify(payload)));
+ return {ciphertext:b64(encrypted),iv:b64(iv)};
+}
+async function decryptSubmission(ciphertext,iv,caseId,secret){
+ const key=await submissionKey(secret);
+ const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(iv),additionalData:bytes(caseId)},key,unb64(ciphertext));
+ return JSON.parse(new TextDecoder().decode(plain));
+}
+async function takePublicLimit(db,request,secret,purpose){
+ if(typeof secret!=='string'||secret.length<48)return {configured:false};
+ const ip=request.headers.get('CF-Connecting-IP')||'unknown';
+ const key=await crypto.subtle.importKey('raw',bytes(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+ const fingerprint=hex(await crypto.subtle.sign('HMAC',key,bytes(purpose+':'+ip)));
+ const windowStart=Math.floor(Date.now()/3600000)*3600;
+ const row=await db.prepare(`INSERT INTO public_intake_limits(fingerprint,window_start,attempts)
+ VALUES(?,?,1)
+ ON CONFLICT(fingerprint) DO UPDATE SET
+ attempts=CASE WHEN public_intake_limits.window_start=excluded.window_start
+  THEN public_intake_limits.attempts+1 ELSE 1 END,
+ window_start=excluded.window_start
+ RETURNING attempts`).bind(fingerprint,windowStart).first();
+ if(Math.random()<0.01)await db.prepare('DELETE FROM public_intake_limits WHERE window_start<?').bind(windowStart-86400).run();
+ return {configured:true,allowed:Number(row?.attempts||0)<=5};
+}
+function validEmail(value){
+ return typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 export default {async fetch(request,env){
  const url=new URL(request.url),path=url.pathname,method=request.method;
  // Public demo is a static mock only: no sessions, API or D1 access.
@@ -87,6 +123,57 @@ export default {async fetch(request,env){
  }
  if(path==='/api/health'&&method==='GET')return json({ok:true,service:'zdnp-e-podnesoci'});
  if(!env.DB)return json({error:'D1 not configured'},503);
+  if(path==='/api/public/submissions'&&method==='POST'){
+   const throttle=await takePublicLimit(env.DB,request,env.PUBLIC_INTAKE_HMAC_KEY,'submit');
+   if(!throttle.configured)return json({error:'public intake is not configured'},503);
+   if(!throttle.allowed)return json({error:'too many submissions; try again later'},429,{'retry-after':'3600'});
+   const body=await parse(request);
+   if(!['request','petition'].includes(body.kind))return json({error:'this submission type requires a separate confidential review route'},409);
+   const institution=String(body.institution||'');
+   if(!['IDR','PRI','STI'].includes(institution))return json({error:'invalid institution'},400);
+   const fullName=String(body.fullName||'').trim();
+   const registryNumber=String(body.registryNumber||'').trim();
+   const treatment=String(body.treatment||'');
+   const subject=String(body.subject||'').trim();
+   const message=String(body.body||'').trim();
+   const email=String(body.email||'').trim();
+   if(fullName.length<2||fullName.length>120||registryNumber.length<1||registryNumber.length>40||
+      !['closed','semi-open','open'].includes(treatment)||subject.length<2||subject.length>180||
+      message.length<10||message.length>6000||!validEmail(email)||String(body.website||'').trim())
+    return json({error:'invalid submission fields'},400);
+   if(typeof env.CASE_ENCRYPTION_KEY!=='string'||env.CASE_ENCRYPTION_KEY.length<48)
+    return json({error:'secure intake is not configured'},503);
+   const id=crypto.randomUUID();
+   const caseNumber='ZDNP-'+new Date().getUTCFullYear()+'-'+id.replaceAll('-','').toUpperCase();
+   const trackingToken=random();
+   const encrypted=await encryptSubmission({
+    kind:body.kind,institution,fullName,registryNumber,treatment,subject,message,email
+   },id,env.CASE_ENCRYPTION_KEY);
+   await env.DB.batch([
+    env.DB.prepare('INSERT INTO cases(id,institution_id,case_number,category,status,confidential) VALUES(?,?,?,?,?,0)')
+     .bind(id,institution,caseNumber,body.kind,'received'),
+    env.DB.prepare('INSERT INTO case_submissions(case_id,payload_ciphertext,payload_iv) VALUES(?,?,?)')
+     .bind(id,encrypted.ciphertext,encrypted.iv),
+    env.DB.prepare('UPDATE cases SET tracking_token_hash=? WHERE id=?').bind(await hash(trackingToken),id),
+    env.DB.prepare("INSERT INTO audit_events(institution_id,actor_id,target_id,action) VALUES(?, 'public', ?, 'public-submission')")
+     .bind(institution,id)
+   ]);
+   return json({ok:true,caseNumber,trackingToken},201);
+  }
+  if(path==='/api/public/status'&&method==='POST'){
+   const throttle=await takePublicLimit(env.DB,request,env.PUBLIC_INTAKE_HMAC_KEY,'status');
+   if(!throttle.configured)return json({error:'public status lookup is not configured'},503);
+   if(!throttle.allowed)return json({error:'too many attempts; try again later'},429,{'retry-after':'3600'});
+   const body=await parse(request);
+   const caseNumber=String(body.caseNumber||'').trim().toUpperCase();
+   const token=String(body.trackingToken||'').trim();
+   if(!/^ZDNP-[0-9]{4}-[A-F0-9]{32}$/.test(caseNumber)||! /^[a-f0-9]{64}$/.test(token))
+    return json({error:'case or tracking code not found'},404);
+   const item=await env.DB.prepare('SELECT case_number,status,created_at FROM cases WHERE case_number=? AND tracking_token_hash=?')
+    .bind(caseNumber,await hash(token)).first();
+   if(!item)return json({error:'case or tracking code not found'},404);
+   return json({caseNumber:item.case_number,status:item.status,createdAt:item.created_at});
+  }
  if(method!=='GET'){
   const origin=request.headers.get('origin');
   if(origin&&origin!==url.origin)return json({error:'invalid origin'},403);
@@ -220,6 +307,24 @@ export default {async fetch(request,env){
    return response;
   }
   if(actor.must_change_password&&!actor.testAccess)return json({error:'change password required'},403);
+  const caseMatch=path.match(/^\/api\/cases\/([a-f0-9-]{36})$/i);
+  if(caseMatch&&method==='GET'){
+   if(!['educator','director'].includes(actor.role))return json({error:'forbidden'},403);
+   const item=await env.DB.prepare('SELECT * FROM cases WHERE id=? AND institution_id=?')
+    .bind(caseMatch[1],actor.institution_id).first();
+   if(!item||item.confidential===1)return json({error:'not found'},404);
+   const allowed=actor.role==='educator'
+    ?(!item.assigned_to||item.assigned_to===actor.id)
+    :(['forwarded','answered','closed'].includes(item.status));
+   if(!allowed)return json({error:'not found'},404);
+   if(typeof env.CASE_ENCRYPTION_KEY!=='string'||env.CASE_ENCRYPTION_KEY.length<48)
+    return json({error:'secure case access is not configured'},503);
+   const encrypted=await env.DB.prepare('SELECT payload_ciphertext,payload_iv FROM case_submissions WHERE case_id=?').bind(item.id).first();
+   if(!encrypted)return json({error:'case details unavailable'},404);
+   const submission=await decryptSubmission(encrypted.payload_ciphertext,encrypted.payload_iv,item.id,env.CASE_ENCRYPTION_KEY);
+   try{await audit(env.DB,actor,'view-case',item.id)}catch(e){console.error('audit.view_case_failed',{errorName:e?.name||'Error'});}
+   return json({case:{id:item.id,caseNumber:item.case_number,category:item.category,status:item.status,createdAt:item.created_at},submission});
+  }
   if(path==='/api/cases'&&method==='GET'){
    if(!['educator','director'].includes(actor.role))return json({error:'forbidden'},403);
    const rows=await env.DB.prepare(`SELECT id,case_number,category,status,created_at FROM cases

@@ -39,6 +39,21 @@ npm test
 
 The current CI does not perform real Cloudflare Access or D1 end-to-end tests. Green CI alone is not deployment approval.
 
+## Public web intake (staging)
+
+The Worker now defines:
+- `POST /api/public/submissions` for request and petition submissions;
+- `POST /api/public/status` for status lookup using the case number and the one-time tracking code;
+- `GET /api/cases/{id}` for institution-scoped educators/directors to read an authorized non-confidential submission.
+
+The public payload is encrypted with AES-GCM before it reaches D1. The tracking code is returned once to the submitter; only its SHA-256 hash is stored. Public rate limiting stores an HMAC fingerprint of the Cloudflare client IP, not the raw IP.
+
+Before the endpoint can accept submissions, apply migration `0003_public_intake.sql` to the staging D1 database and configure two Worker secrets (never commit them):
+- `CASE_ENCRYPTION_KEY`: at least 48 random characters; keep a protected backup because losing it makes submitted content unreadable.
+- `PUBLIC_INTAKE_HMAC_KEY`: at least 48 random characters; changing it resets rate-limit fingerprints.
+
+Then deploy the Worker through the protected manual staging workflow. The website form is limited to requests and petitions for now. Complaints and corruption/irregularity reports remain disabled until a separate confidential reviewer and routing path are defined. The app and website display a test-data warning. Do not accept real personal or correctional records on this staging system.
+
 ## Remaining security blockers
 - Complete integration tests for all three institutions, NGAD cross-institution actions, session revocation and negative access cases.
 - CSRF protection, atomic login throttling / WAF rules, secure password-change UI and audit coverage.

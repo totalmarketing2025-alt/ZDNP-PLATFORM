@@ -1,10 +1,10 @@
 # ZDNP e-PODNESOCI — development specification (draft)
 
-Status: DEVELOPMENT ONLY. No live submission intake or staff accounts. No real prisoner or family personal data.
+Status: DEVELOPMENT/STAGING ONLY. Public request/petition endpoints are being added to the staging Worker; no production intake is authorized. Do not enter real prisoner or family personal data.
 
 ## Scope
 Three separately isolated institutions: Idrizovo (IDR), Prilep (PRI), Stip (STI).
-Public submission at /podnesoci, status at /status; staff sign-in at /login, protected /dashboard, /predmeti, /administracija.
+Current web form at the homepage submits requests/petitions to POST /api/public/submissions and checks status with POST /api/public/status. Staff sign-in is /najava; protected dashboard is /dashboard. Complaints and corruption reports need a separate confidential review route.
 
 ## Roles
 - Public submitter: create and securely track own case.
@@ -38,5 +38,5 @@ Case transitions must be authorized, audited, and idempotent.
 5. Security and privacy review, institutional agreements, then controlled pilot.
 
 ## Existing repository baseline
-As inspected 2026-11-11: static root index.html, assets/logo.svg, assets/hero.svg, README.md, .gitignore. No backend currently present.
+Earlier baseline (2026-11-11): static root website only. Later revisions added the Cloudflare Worker, D1 schema, staff login, and staging API.
 Do not change main or deploy this branch without separate review.
