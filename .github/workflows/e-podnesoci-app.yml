@@ -26,6 +26,20 @@ jobs:
           cache: true
       - name: Generate Android platform files
         run: flutter create --project-name zdnp_e_podnesoci --platforms=android .
+      - name: Enable Android internet permission
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          content = manifest.read_text()
+          permission = '<uses-permission android:name="android.permission.INTERNET" />'
+          if permission not in content:
+              content = content.replace("<application", f"    {permission}\\n    <application", 1)
+              manifest.write_text(content)
+          if permission not in manifest.read_text():
+              raise SystemExit("INTERNET permission missing from main manifest")
+          PY
       - run: flutter pub get
       - run: flutter analyze
       - name: Build release APK
