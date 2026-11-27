@@ -35,7 +35,7 @@ jobs:
           content = manifest.read_text()
           permission = '<uses-permission android:name="android.permission.INTERNET" />'
           if permission not in content:
-              content = content.replace("<application", f"    {permission}\\n    <application", 1)
+              content = content.replace("<application", "    " + permission + chr(10) + "    <application", 1)
               manifest.write_text(content)
           if permission not in manifest.read_text():
               raise SystemExit("INTERNET permission missing from main manifest")
