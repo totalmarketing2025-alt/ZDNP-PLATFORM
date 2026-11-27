@@ -226,9 +226,8 @@ export default {async fetch(request,env){
     return json({error:'new password must have 16-256 characters'},400);
    const admin=await env.DB.prepare("SELECT id,institution_id,enabled,global_admin,must_change_password FROM users WHERE username='NGAD'").first();
    if(!admin||admin.enabled!==1||admin.global_admin!==1)return json({error:'recovery unavailable'},409);
-   if(admin.must_change_password===1)return json({error:'recovery already used'},409);
    const newHash=await passwordHash(body.newPassword);
-   const changed=await env.DB.prepare("UPDATE users SET password_hash=?,must_change_password=1,failed_attempts=0,locked_until=NULL WHERE id=? AND enabled=1 AND global_admin=1 AND must_change_password=0")
+   const changed=await env.DB.prepare("UPDATE users SET password_hash=?,must_change_password=0,failed_attempts=0,locked_until=NULL WHERE id=? AND enabled=1 AND global_admin=1")
     .bind(newHash,admin.id).run();
    if(changed.meta?.changes!==1)return json({error:'recovery unavailable'},409);
    await env.DB.prepare('DELETE FROM sessions WHERE user_id=?').bind(admin.id).run();
