@@ -1,6 +1,11 @@
 name: Deploy isolated e-PODNESOCI presentation
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "presentation-e-podnesoci/**"
+      - ".github/workflows/deploy-epodnesoci-presentation.yml"
   workflow_dispatch:
 
 permissions:
