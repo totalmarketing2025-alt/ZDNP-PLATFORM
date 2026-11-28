@@ -1,11 +1,6 @@
 name: Deploy isolated e-PODNESOCI presentation
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "presentation-e-podnesoci/**"
-      - ".github/workflows/deploy-epodnesoci-presentation.yml"
   workflow_dispatch:
 
 permissions:
@@ -31,23 +26,14 @@ jobs:
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo "::error::Missing CLOUDFLARE_API_TOKEN"; exit 1; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo "::error::Missing CLOUDFLARE_ACCOUNT_ID"; exit 1; }
-      - name: Deploy standalone presentation Worker
-        id: deploy
+      - name: Create separate Pages project if needed
+        continue-on-error: true
+        run: npx --yes wrangler@4 pages project create zdnp-e-podnesoci-demo --production-branch main
+      - name: Publish the separate presentation site
+        run: npx --yes wrangler@4 pages deploy public --project-name zdnp-e-podnesoci-demo --branch main
+      - name: Verify the live presentation page
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 deploy 2>&1 | tee /tmp/epodnesoci-demo-deploy.log
-          url="$(grep -Eo 'https://[^[:space:]]+workers\.dev' /tmp/epodnesoci-demo-deploy.log | tail -n 1 || true)"
-          if [ -z "$url" ]; then
-            echo "::error::Wrangler did not report a workers.dev URL"
-            exit 1
-          fi
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-      - name: Verify the published presentation page
-        shell: bash
-        env:
-          DEMO_URL: ${{ steps.deploy.outputs.url }}
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --retry 12 --retry-delay 3 --retry-connrefused "$DEMO_URL/" -o /tmp/epodnesoci-demo.html
+          curl --fail --silent --show-error --retry 12 --retry-delay 3 --retry-connrefused https://zdnp-e-podnesoci-demo.pages.dev/ -o /tmp/epodnesoci-demo.html
           grep -q "ДЕМО ЗА ПРЕЗЕНТАЦИЈА" /tmp/epodnesoci-demo.html
