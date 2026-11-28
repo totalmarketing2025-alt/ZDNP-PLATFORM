@@ -1,0 +1,50 @@
+name: Deploy isolated e-PODNESOCI presentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "presentation-e-podnesoci/**"
+      - ".github/workflows/deploy-epodnesoci-presentation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: epodnesoci-presentation
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify Cloudflare deployment secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo "::error::Missing CLOUDFLARE_API_TOKEN"; exit 1; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo "::error::Missing CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+
+      - name: Create the separate Pages project if needed
+        continue-on-error: true
+        run: npx --yes wrangler@4 pages project create zdnp-e-podnesoci-demo --production-branch main
+
+      - name: Publish the isolated demo
+        run: npx --yes wrangler@4 pages deploy presentation-e-podnesoci --project-name zdnp-e-podnesoci-demo --branch main
+
+      - name: Verify the published presentation page
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 12 --retry-delay 3 --retry-connrefused https://zdnp-e-podnesoci-demo.pages.dev/ -o /tmp/epodnesoci-demo.html
+          grep -q "ДЕМО ЗА ПРЕЗЕНТАЦИЈА" /tmp/epodnesoci-demo.html
